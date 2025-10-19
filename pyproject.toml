@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "counsel-ai"
+version = "0.1.0"
+description = "Counsel AI - Italian legal assistant (MVP)"
+authors = [{ name = "IPPAN Labs" }]
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "Proprietary" }
+keywords = ["legal", "ai", "italy", "privacy"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: Other/Proprietary License",
+  "Operating System :: POSIX :: Linux",
+]
+dependencies = [
+  "pydantic>=2.7",
+  "rich>=13.7",
+  "typer>=0.12",
+  "jinja2>=3.1",
+  "python-docx>=1.1",
+  "reportlab>=4.2",
+  "sqlite-utils>=3.36",
+  "qdrant-client>=1.9",
+  "cryptography>=43.0",
+]
+
+[project.scripts]
+counsel-ai = "counsel_ai.cli:app"
