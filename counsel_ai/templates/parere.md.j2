@@ -1,0 +1,22 @@
+# {{ opinion.title }}
+
+Generato il: {{ opinion.generated_at }}
+
+## Sommario
+{{ opinion.summary }}
+
+## Raccomandazioni
+{% for rec in opinion.recommendations %}- {{ rec }}
+{% endfor %}
+
+## Citazioni
+{% for cit in opinion.citations %}- {{ cit }}
+{% endfor %}
+
+## Dati di caso
+- ID: {{ case.case_id }}
+- Cliente: {{ case.client.name }} ({{ case.client.role }})
+- Giurisdizione: {{ case.jurisdiction or "N/D" }}
+- Fatti:
+{% for f in case.facts %}- {{ f }}
+{% endfor %}
