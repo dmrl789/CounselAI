@@ -20,7 +20,7 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn from_env() -> Result<Self, Box<dyn std::error::Error>> {
+    pub fn from_env() -> Result<Self, anyhow::Error> {
         Ok(Config {
             bind_addr: env::var("BIND_ADDR").unwrap_or_else(|_| "0.0.0.0:5142".to_string()),
             api_key: env::var("API_KEY").unwrap_or_else(|_| "counsel-ai-dev-key".to_string()),

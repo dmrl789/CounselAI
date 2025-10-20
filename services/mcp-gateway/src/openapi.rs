@@ -3,8 +3,8 @@ use utoipa_swagger_ui::SwaggerUi;
 
 use crate::{
     model::*,
-    routes::*,
-    health::*,
+    routes,
+    health::{self, HealthResponse, HealthChecks, CheckResult},
 };
 
 #[derive(OpenApi)]

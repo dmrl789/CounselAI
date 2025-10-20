@@ -1,0 +1,2 @@
+[console_scripts]
+counsel-ai = counsel_ai.cli:app

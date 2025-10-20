@@ -8,10 +8,15 @@ export default function ModelVerifier() {
   async function checkModel() {
     try {
       const result = await invoke<string>("verify_active_model");
-      setHash(result);
-      setStatus("✅ Model integrity verified");
+      setStatus(
+        result.startsWith("✅ Model repaired")
+          ? "🛠️ Model auto-repaired successfully"
+          : "✅ Model verified OK"
+      );
+      const match = result.match(/SHA256:\s*([0-9a-f]+)/i);
+      if (match) setHash(match[1]);
     } catch (err: any) {
-      setStatus(`⚠️ ${err}`);
+      setStatus(`❌ ${err}`);
     }
   }
 
@@ -24,19 +29,15 @@ export default function ModelVerifier() {
   return (
     <div
       className={`p-2 text-sm rounded mb-2 ${
-        status.startsWith("✅")
-          ? "bg-green-700 text-white"
-          : status.startsWith("⚠️")
-          ? "bg-yellow-700 text-white"
-          : "bg-gray-800 text-gray-200"
-      }`}
+        status.includes("✅")
+          ? "bg-green-700"
+          : status.includes("🛠️")
+          ? "bg-blue-700"
+          : "bg-red-700"
+      } text-white`}
     >
       {status}
-      {hash && (
-        <div className="text-xs text-gray-300 break-all mt-1">
-          SHA256: {hash}
-        </div>
-      )}
+      {hash && <div className="text-xs mt-1 break-all">SHA256: {hash}</div>}
     </div>
   );
 }
