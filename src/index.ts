@@ -3,6 +3,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod';
 import { EncryptedVault } from './crypto/vault.js';
 import { registerVaultTools } from './mcp/tools/vaultTools.js';
+import { validateModelRegistry, RegistryValidationError } from './mcp/registry/registryGuard.js';
 
 const EnvSchema = z.object({
   MCP_VAULT_PATH: z.string().default('.data/vault.bin'),
@@ -23,6 +24,16 @@ function loadEnv() {
 
 async function main() {
   const { MCP_VAULT_PATH, MCP_VAULT_PASSPHRASE } = loadEnv();
+
+  try {
+    await validateModelRegistry();
+  } catch (error) {
+    if (error instanceof RegistryValidationError) {
+      console.error('Model registry validation failed:', error.message);
+      process.exit(1);
+    }
+    throw error;
+  }
 
   const vault = new EncryptedVault(MCP_VAULT_PATH, MCP_VAULT_PASSPHRASE);
 
