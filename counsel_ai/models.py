@@ -1,12 +1,16 @@
 from __future__ import annotations
-from typing import List, Optional, Literal
-from pydantic import BaseModel, Field
+
 from datetime import datetime
+from typing import List, Literal, Optional
+
+from pydantic import BaseModel, Field
 
 
 class Party(BaseModel):
     name: str
-    role: Literal["Ricorrente", "Resistente", "Attore", "Convenuto", "Cliente", "Controparte"]
+    role: Literal[
+        "Ricorrente", "Resistente", "Attore", "Convenuto", "Cliente", "Controparte"
+    ]
 
 
 class CaseFile(BaseModel):
