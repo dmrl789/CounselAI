@@ -1,0 +1,172 @@
+version: "3.9"
+
+services:
+  # ----------------------------------------------------
+  # 1. MCP Gateway — Production Configuration
+  # ----------------------------------------------------
+  mcp-gateway:
+    container_name: counselai_mcp_prod
+    build:
+      context: ./services/mcp-gateway
+      dockerfile: Dockerfile
+    image: counselai/mcp-gateway:latest
+    restart: unless-stopped
+    environment:
+      - API_KEY=${API_KEY}
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GPT_MODEL=${GPT_MODEL:-gpt-4}
+      - VECTOR_DB_URL=http://qdrant:6333
+      - STORAGE_PATH=/data/encrypted
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      - LOG_LEVEL=${LOG_LEVEL:-info}
+      - RATE_LIMIT_PER_SECOND=${RATE_LIMIT_PER_SECOND:-10}
+      - RATE_LIMIT_BURST_SIZE=${RATE_LIMIT_BURST_SIZE:-20}
+      - MAX_REQUEST_SIZE=${MAX_REQUEST_SIZE:-1048576}
+      - ENABLE_COMPRESSION=${ENABLE_COMPRESSION:-true}
+      - ENABLE_CORS=${ENABLE_CORS:-true}
+    volumes:
+      - ./data:/data
+      - ./logs:/logs
+    ports:
+      - "5142:5142"
+    networks:
+      - counsel_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5142/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+          cpus: '1.0'
+        reservations:
+          memory: 1G
+          cpus: '0.5'
+
+  # ----------------------------------------------------
+  # 2. Qdrant — Vector Database
+  # ----------------------------------------------------
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: counselai_qdrant_prod
+    restart: unless-stopped
+    environment:
+      QDRANT__STORAGE__PATH: /qdrant/storage
+      QDRANT__SERVICE__GRPC_PORT: 6334
+      QDRANT__SERVICE__HTTP_PORT: 6333
+    volumes:
+      - ./data/qdrant:/qdrant/storage
+    ports:
+      - "6333:6333"
+      - "6334:6334"
+    networks:
+      - counsel_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+          cpus: '0.5'
+
+  # ----------------------------------------------------
+  # 3. Nginx — Reverse Proxy & Load Balancer
+  # ----------------------------------------------------
+  nginx:
+    image: nginx:alpine
+    container_name: counselai_nginx_prod
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx/ssl:/etc/nginx/ssl:ro
+      - ./logs/nginx:/var/log/nginx
+    depends_on:
+      - mcp-gateway
+    networks:
+      - counsel_net
+    healthcheck:
+      test: ["CMD", "nginx", "-t"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ----------------------------------------------------
+  # 4. Prometheus — Metrics Collection
+  # ----------------------------------------------------
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: counselai_prometheus_prod
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    networks:
+      - counsel_net
+
+  # ----------------------------------------------------
+  # 5. Grafana — Monitoring Dashboard
+  # ----------------------------------------------------
+  grafana:
+    image: grafana/grafana:latest
+    container_name: counselai_grafana_prod
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD:-admin}
+      - GF_USERS_ALLOW_SIGN_UP=false
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitoring/grafana/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./monitoring/grafana/datasources:/etc/grafana/provisioning/datasources:ro
+    depends_on:
+      - prometheus
+    networks:
+      - counsel_net
+
+  # ----------------------------------------------------
+  # 6. Redis — Caching & Session Store
+  # ----------------------------------------------------
+  redis:
+    image: redis:7-alpine
+    container_name: counselai_redis_prod
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-counsel-ai-redis}
+    networks:
+      - counsel_net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  prometheus_data:
+  grafana_data:
+  redis_data:
+
+networks:
+  counsel_net:
+    driver: bridge
