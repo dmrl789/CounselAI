@@ -58,7 +58,7 @@ async fn main() -> anyhow::Result<()> {
     // Rate limiting configuration
     let governor_conf = Box::new(
         GovernorConfigBuilder::default()
-            .per_second(config.rate_limit_per_second)
+            .per_second(config.rate_limit_per_second as u64)
             .burst_size(config.rate_limit_burst_size)
             .finish()
             .unwrap(),
@@ -81,7 +81,7 @@ async fn main() -> anyhow::Result<()> {
                 .layer(CompressionLayer::new())
                 .layer(SetSensitiveHeadersLayer::new(std::iter::once(AUTHORIZATION)))
                 .layer(GovernorLayer {
-                    config: governor_conf,
+                    config: &governor_conf,
                 })
                 .layer(
                     CorsLayer::new()

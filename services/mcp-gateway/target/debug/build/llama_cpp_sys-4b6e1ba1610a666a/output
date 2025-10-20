@@ -1,0 +1,187 @@
+cargo:rerun-if-changed=./thirdparty/llama.cpp
+Generating bindings..
+Compiling GGML..
+OUT_DIR = Some(/workspace/services/mcp-gateway/target/debug/build/llama_cpp_sys-4b6e1ba1610a666a/out)
+OPT_LEVEL = Some(0)
+TARGET = Some(x86_64-unknown-linux-gnu)
+CARGO_ENCODED_RUSTFLAGS = Some()
+HOST = Some(x86_64-unknown-linux-gnu)
+cargo:rerun-if-env-changed=CC_x86_64-unknown-linux-gnu
+CC_x86_64-unknown-linux-gnu = None
+cargo:rerun-if-env-changed=CC_x86_64_unknown_linux_gnu
+CC_x86_64_unknown_linux_gnu = None
+cargo:rerun-if-env-changed=HOST_CC
+HOST_CC = None
+cargo:rerun-if-env-changed=CC
+CC = None
+cargo:rerun-if-env-changed=CC_ENABLE_DEBUG_OUTPUT
+RUSTC_WRAPPER = None
+cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
+CRATE_CC_NO_DEFAULTS = None
+DEBUG = Some(true)
+cargo:rerun-if-env-changed=CFLAGS
+CFLAGS = None
+cargo:rerun-if-env-changed=HOST_CFLAGS
+HOST_CFLAGS = None
+cargo:rerun-if-env-changed=CFLAGS_x86_64_unknown_linux_gnu
+CFLAGS_x86_64_unknown_linux_gnu = None
+cargo:rerun-if-env-changed=CFLAGS_x86_64-unknown-linux-gnu
+CFLAGS_x86_64-unknown-linux-gnu = None
+cargo:warning=./thirdparty/llama.cpp/ggml.c:155:9: warning: 'GGML_DEBUG' macro redefined [-Wmacro-redefined]
+cargo:warning=  155 | #define GGML_DEBUG 0
+cargo:warning=      |         ^
+cargo:warning=<command line>:2:9: note: previous definition is here
+cargo:warning=    2 | #define GGML_DEBUG 100
+cargo:warning=      |         ^
+cargo:warning=./thirdparty/llama.cpp/ggml.c:1571:5: warning: implicit conversion increases floating-point precision: 'float' to 'ggml_float' (aka 'double') [-Wdouble-promotion]
+cargo:warning= 1571 |     GGML_F16_VEC_REDUCE(sumf, sum);
+cargo:warning=      |     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cargo:warning=./thirdparty/llama.cpp/ggml.c:1087:37: note: expanded from macro 'GGML_F16_VEC_REDUCE'
+cargo:warning= 1087 | #define GGML_F16_VEC_REDUCE         GGML_F32Cx16_REDUCE
+cargo:warning=      |                                     ^
+cargo:warning=./thirdparty/llama.cpp/ggml.c:1076:11: note: expanded from macro 'GGML_F32Cx16_REDUCE'
+cargo:warning= 1076 |     res = _mm512_reduce_add_ps(x[0]);                             \
+cargo:warning=      |         ~ ^~~~~~~~~~~~~~~~~~~~~~~~~~
+cargo:warning=./thirdparty/llama.cpp/ggml.c:1619:9: warning: implicit conversion increases floating-point precision: 'float' to 'ggml_float' (aka 'double') [-Wdouble-promotion]
+cargo:warning= 1619 |         GGML_F16_VEC_REDUCE(sumf[k], sum[k]);
+cargo:warning=      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cargo:warning=./thirdparty/llama.cpp/ggml.c:1087:37: note: expanded from macro 'GGML_F16_VEC_REDUCE'
+cargo:warning= 1087 | #define GGML_F16_VEC_REDUCE         GGML_F32Cx16_REDUCE
+cargo:warning=      |                                     ^
+cargo:warning=./thirdparty/llama.cpp/ggml.c:1076:11: note: expanded from macro 'GGML_F32Cx16_REDUCE'
+cargo:warning= 1076 |     res = _mm512_reduce_add_ps(x[0]);                             \
+cargo:warning=      |         ~ ^~~~~~~~~~~~~~~~~~~~~~~~~~
+cargo:warning=./thirdparty/llama.cpp/ggml.c:2643:19: warning: unused function 'ggml_up32' [-Wunused-function]
+cargo:warning= 2643 | static inline int ggml_up32(int n) {
+cargo:warning=      |                   ^~~~~~~~~
+cargo:warning=./thirdparty/llama.cpp/ggml.c:19396:13: warning: unused function 'ggml_opt_get_grad' [-Wunused-function]
+cargo:warning= 19396 | static void ggml_opt_get_grad(int np, struct ggml_tensor * const ps[], float * g) {
+cargo:warning=       |             ^~~~~~~~~~~~~~~~~
+cargo:warning=5 warnings generated.
+cargo:warning=./thirdparty/llama.cpp/ggml-alloc.c:436:13: warning: unused function 'ggml_gallocr_set_node_offset' [-Wunused-function]
+cargo:warning=  436 | static void ggml_gallocr_set_node_offset(ggml_gallocr_t galloc, struct ggml_tensor * node, int buffer_id, size_t offset) {
+cargo:warning=      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cargo:warning=1 warning generated.
+cargo:warning=./thirdparty/llama.cpp/ggml-backend.c:1188:13: warning: unused function 'ggml_backend_sched_print_assignments' [-Wunused-function]
+cargo:warning= 1188 | static void ggml_backend_sched_print_assignments(ggml_backend_sched_t sched, struct ggml_cgraph * graph) {
+cargo:warning=      |             ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+cargo:warning=1 warning generated.
+cargo:warning=./thirdparty/llama.cpp/ggml-quants.c:65:23: warning: unused function 'mul_sum_i8_pairs' [-Wunused-function]
+cargo:warning=   65 | static inline __m128i mul_sum_i8_pairs(const __m128i x, const __m128i y) {
+cargo:warning=      |                       ^~~~~~~~~~~~~~~~
+cargo:warning=./thirdparty/llama.cpp/ggml-quants.c:96:19: warning: unused function 'hsum_i32_4' [-Wunused-function]
+cargo:warning=   96 | static inline int hsum_i32_4(const __m128i a) {
+cargo:warning=      |                   ^~~~~~~~~~
+cargo:warning=./thirdparty/llama.cpp/ggml-quants.c:128:22: warning: unused function 'sum_i16_pairs_float' [-Wunused-function]
+cargo:warning=  128 | static inline __m256 sum_i16_pairs_float(const __m256i x) {
+cargo:warning=      |                      ^~~~~~~~~~~~~~~~~~~
+cargo:warning=./thirdparty/llama.cpp/ggml-quants.c:161:23: warning: unused function 'packNibbles' [-Wunused-function]
+cargo:warning=  161 | static inline __m128i packNibbles( __m256i bytes )
+cargo:warning=      |                       ^~~~~~~~~~~
+cargo:warning=./thirdparty/llama.cpp/ggml-quants.c:1447:14: warning: unused function 'make_qkx1_quants' [-Wunused-function]
+cargo:warning= 1447 | static float make_qkx1_quants(int n, int nmax, const float * restrict x, uint8_t * restrict L, float * restrict the_min,
+cargo:warning=      |              ^~~~~~~~~~~~~~~~
+cargo:warning=./thirdparty/llama.cpp/ggml-quants.c:11700:12: warning: unused function 'iq1_find_best_neighbour' [-Wunused-function]
+cargo:warning= 11700 | static int iq1_find_best_neighbour(const uint16_t * restrict neighbours, const uint64_t * restrict grid,
+cargo:warning=       |            ^~~~~~~~~~~~~~~~~~~~~~~
+cargo:warning=6 warnings generated.
+exit status: 0
+exit status: 0
+exit status: 0
+exit status: 0
+cargo:rerun-if-env-changed=AR_x86_64-unknown-linux-gnu
+AR_x86_64-unknown-linux-gnu = None
+cargo:rerun-if-env-changed=AR_x86_64_unknown_linux_gnu
+AR_x86_64_unknown_linux_gnu = None
+cargo:rerun-if-env-changed=HOST_AR
+HOST_AR = None
+cargo:rerun-if-env-changed=AR
+AR = None
+cargo:rerun-if-env-changed=ARFLAGS
+ARFLAGS = None
+cargo:rerun-if-env-changed=HOST_ARFLAGS
+HOST_ARFLAGS = None
+cargo:rerun-if-env-changed=ARFLAGS_x86_64_unknown_linux_gnu
+ARFLAGS_x86_64_unknown_linux_gnu = None
+cargo:rerun-if-env-changed=ARFLAGS_x86_64-unknown-linux-gnu
+ARFLAGS_x86_64-unknown-linux-gnu = None
+cargo:rustc-link-lib=static=ggml
+cargo:rustc-link-search=native=/workspace/services/mcp-gateway/target/debug/build/llama_cpp_sys-4b6e1ba1610a666a/out
+Compiling Llama.cpp..
+OUT_DIR = Some(/workspace/services/mcp-gateway/target/debug/build/llama_cpp_sys-4b6e1ba1610a666a/out)
+OPT_LEVEL = Some(0)
+TARGET = Some(x86_64-unknown-linux-gnu)
+CARGO_ENCODED_RUSTFLAGS = Some()
+HOST = Some(x86_64-unknown-linux-gnu)
+cargo:rerun-if-env-changed=CXX_x86_64-unknown-linux-gnu
+CXX_x86_64-unknown-linux-gnu = None
+cargo:rerun-if-env-changed=CXX_x86_64_unknown_linux_gnu
+CXX_x86_64_unknown_linux_gnu = None
+cargo:rerun-if-env-changed=HOST_CXX
+HOST_CXX = None
+cargo:rerun-if-env-changed=CXX
+CXX = None
+cargo:rerun-if-env-changed=CC_ENABLE_DEBUG_OUTPUT
+RUSTC_WRAPPER = None
+cargo:rerun-if-env-changed=CRATE_CC_NO_DEFAULTS
+CRATE_CC_NO_DEFAULTS = None
+DEBUG = Some(true)
+cargo:rerun-if-env-changed=CXXFLAGS
+CXXFLAGS = None
+cargo:rerun-if-env-changed=HOST_CXXFLAGS
+HOST_CXXFLAGS = None
+cargo:rerun-if-env-changed=CXXFLAGS_x86_64_unknown_linux_gnu
+CXXFLAGS_x86_64_unknown_linux_gnu = None
+cargo:rerun-if-env-changed=CXXFLAGS_x86_64-unknown-linux-gnu
+CXXFLAGS_x86_64-unknown-linux-gnu = None
+exit status: 0
+exit status: 0
+exit status: 0
+cargo:rerun-if-env-changed=AR_x86_64-unknown-linux-gnu
+AR_x86_64-unknown-linux-gnu = None
+cargo:rerun-if-env-changed=AR_x86_64_unknown_linux_gnu
+AR_x86_64_unknown_linux_gnu = None
+cargo:rerun-if-env-changed=HOST_AR
+HOST_AR = None
+cargo:rerun-if-env-changed=AR
+AR = None
+cargo:rerun-if-env-changed=ARFLAGS
+ARFLAGS = None
+cargo:rerun-if-env-changed=HOST_ARFLAGS
+HOST_ARFLAGS = None
+cargo:rerun-if-env-changed=ARFLAGS_x86_64_unknown_linux_gnu
+ARFLAGS_x86_64_unknown_linux_gnu = None
+cargo:rerun-if-env-changed=ARFLAGS_x86_64-unknown-linux-gnu
+ARFLAGS_x86_64-unknown-linux-gnu = None
+cargo:rustc-link-lib=static=llama
+cargo:rustc-link-search=native=/workspace/services/mcp-gateway/target/debug/build/llama_cpp_sys-4b6e1ba1610a666a/out
+cargo:rerun-if-env-changed=CXXSTDLIB_x86_64-unknown-linux-gnu
+CXXSTDLIB_x86_64-unknown-linux-gnu = None
+cargo:rerun-if-env-changed=CXXSTDLIB_x86_64_unknown_linux_gnu
+CXXSTDLIB_x86_64_unknown_linux_gnu = None
+cargo:rerun-if-env-changed=HOST_CXXSTDLIB
+HOST_CXXSTDLIB = None
+cargo:rerun-if-env-changed=CXXSTDLIB
+CXXSTDLIB = None
+cargo:rustc-link-lib=stdc++
+cargo:rerun-if-env-changed=NM_PATH
+Looking for "nm" or an equivalent tool
+NM_PATH not set, looking for ["nm", "llvm-nm"] in PATH
+Valid tool found:
+GNU nm (GNU Binutils for Ubuntu) 2.44
+Copyright (C) 2025 Free Software Foundation, Inc.
+This program is free software; you may redistribute it under the terms of
+the GNU General Public License version 3 or (at your option) any later version.
+This program has absolutely no warranty.
+
+cargo:rerun-if-env-changed=OBJCOPY_PATH
+Looking for "objcopy" or an equivalent tool..
+OBJCOPY_PATH not set, looking for ["objcopy", "llvm-objcopy"] in PATH
+Valid tool found:
+GNU objcopy (GNU Binutils for Ubuntu) 2.44
+Copyright (C) 2025 Free Software Foundation, Inc.
+This program is free software; you may redistribute it under the terms of
+the GNU General Public License version 3 or (at your option) any later version.
+This program has absolutely no warranty.
+
+Modifying libggml.a and libllama.a, symbols acquired via "nm" and modified via "objcopy"

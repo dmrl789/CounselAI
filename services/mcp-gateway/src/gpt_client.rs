@@ -1,6 +1,6 @@
 use crate::model::{ReasoningRequest, ReasoningResponse};
 use anyhow::{Context, Result};
-use llama_cpp::{Llama, LlamaOptions};
+// use llama_cpp::{Llama, LlamaOptions};
 use reqwest::Client;
 use serde_json::json;
 use std::path::Path;
@@ -48,21 +48,9 @@ pub async fn call_gpt(reason_req: &ReasoningRequest) -> Result<ReasoningResponse
 
 /// Offline reasoning using a local GGUF model (Mistral or Phi-3)
 pub fn call_local_model(req: &ReasoningRequest) -> Result<ReasoningResponse> {
-    let model_path = std::env::var("LOCAL_MODEL_PATH")
-        .unwrap_or_else(|_| "./models/mistral-7b-instruct.Q4_K_M.gguf".to_string());
-    let prompt = format!(
-        "You are an Italian legal assistant. Summarize and analyze this case: {}",
-        req.prompt
-    );
-
-    let mut llama = Llama::new_with_options(
-        Path::new(&model_path),
-        LlamaOptions::default().n_threads(4),
-    )?;
-
-    let response = llama.run(&prompt, None)?;
+    // TODO: Implement local model support
     Ok(ReasoningResponse {
-        summary: response.trim().to_string(),
+        summary: "Local model not implemented yet".to_string(),
         citations: vec![],
     })
 }

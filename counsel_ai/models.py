@@ -1,12 +1,23 @@
 from __future__ import annotations
-from typing import List, Optional, Literal
-from pydantic import BaseModel, Field
+
 from datetime import datetime
+from typing import List, Literal, Optional
+
+from pydantic import BaseModel, Field, field_validator
 
 
 class Party(BaseModel):
     name: str
-    role: Literal["Ricorrente", "Resistente", "Attore", "Convenuto", "Cliente", "Controparte"]
+    role: Literal[
+        "Ricorrente", "Resistente", "Attore", "Convenuto", "Cliente", "Controparte"
+    ]
+
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, v):
+        if not v or not v.strip():
+            raise ValueError("Name cannot be empty")
+        return v.strip()
 
 
 class CaseFile(BaseModel):
@@ -17,6 +28,13 @@ class CaseFile(BaseModel):
     jurisdiction: Optional[str] = None
     applicable_law: List[str] = Field(default_factory=list)
     created_at: datetime = Field(default_factory=datetime.utcnow)
+
+    @field_validator("case_id")
+    @classmethod
+    def validate_case_id(cls, v):
+        if not v or not v.strip():
+            raise ValueError("Case ID cannot be empty")
+        return v.strip()
 
 
 class ReasoningNode(BaseModel):

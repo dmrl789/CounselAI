@@ -30,7 +30,7 @@ pub struct ReasoningRequest {
 }
 
 /// Unified reasoning response structure
-#[derive(Debug, Serialize, Deserialize, Default, Validate, ToSchema)]
+#[derive(Debug, Serialize, Deserialize, Validate, ToSchema)]
 pub struct ReasoningResponse {
     /// Summarized or reasoned output text
     #[validate(length(max = 100000, message = "Summary too long"))]
