@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/tauri";
 import ChatBox from "./components/ChatBox";
 import FileUploader from "./components/FileUploader";
+import ModelVerifier from "./components/ModelVerifier";
+import ModelManager from "./components/ModelManager";
 import axios from "axios";
 
 type Message = {
@@ -91,7 +93,9 @@ export default function App() {
       </main>
 
       {/* ---- Footer ---- */}
-      <footer className="border-t border-gray-700 p-4 flex flex-col gap-2">
+      <footer className="border-t border-gray-700 p-4 flex flex-col gap-4">
+        <ModelVerifier />
+        <ModelManager />
         <FileUploader />
         <form
           onSubmit={e => {

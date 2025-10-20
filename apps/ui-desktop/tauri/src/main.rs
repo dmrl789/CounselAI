@@ -1,10 +1,11 @@
 //! Counsel AI Desktop — Local Tauri Backend
 //! Provides safe, offline integration for the React UI.
-//! Exposes commands for starting the MCP gateway and verifying models.
+//! Includes gateway control, full model verification, and lightweight background checks.
 
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use once_cell::sync::Lazy;
+use sha2::{Digest, Sha256};
 use std::{
     fs,
     io::Read,
@@ -13,11 +14,9 @@ use std::{
     sync::Mutex,
 };
 use tauri::AppHandle;
-
 use anyhow::{anyhow, Result};
-use sha2::{Digest, Sha256};
 
-// Track MCP gateway status
+/// Track MCP gateway status
 static MCP_STATUS: Lazy<Mutex<bool>> = Lazy::new(|| Mutex::new(false));
 
 /// --- Launch Local MCP Gateway ---
@@ -56,7 +55,7 @@ fn app_version() -> String {
     env!("CARGO_PKG_VERSION").to_string()
 }
 
-/// --- Verify Active Local Model ---
+/// --- Full Verify or Repair Active Model ---
 #[tauri::command]
 fn verify_active_model() -> Result<String, String> {
     match verify_or_repair_model() {
@@ -65,6 +64,33 @@ fn verify_active_model() -> Result<String, String> {
     }
 }
 
+/// --- Lightweight background verification (hash-only, non-repairing) ---
+#[tauri::command]
+fn quick_verify_model() -> Result<String, String> {
+    let env_path = Path::new(".env");
+    let content = fs::read_to_string(env_path).unwrap_or_default();
+    let model_line = content
+        .lines()
+        .find(|l| l.starts_with("LOCAL_MODEL_PATH="))
+        .map(|l| l.replacen("LOCAL_MODEL_PATH=", "", 1).trim().to_string());
+
+    let Some(path) = model_line else {
+        return Err("LOCAL_MODEL_PATH not found in .env".into());
+    };
+
+    if !Path::new(&path).exists() {
+        return Err(format!("Model file not found: {}", path));
+    }
+
+    let mut file = std::fs::File::open(&path).map_err(|e| e.to_string())?;
+    let mut hasher = Sha256::new();
+    std::io::copy(&mut file, &mut hasher).map_err(|e| e.to_string())?;
+    let hash = format!("{:x}", hasher.finalize());
+
+    Ok(format!("✅ Model SHA256: {}", hash))
+}
+
+/// --- Helper: Full verify or repair ---
 fn verify_or_repair_model() -> Result<String> {
     let env_path = Path::new(".env");
     let content = fs::read_to_string(env_path).unwrap_or_default();
@@ -116,6 +142,7 @@ fn verify_or_repair_model() -> Result<String> {
     Ok(format!("✅ Model verified successfully (SHA256: {})", computed))
 }
 
+/// --- Utility: Compute SHA256 hash ---
 fn compute_sha256<P: AsRef<Path>>(path: P) -> Result<String> {
     let mut file = std::fs::File::open(&path)?;
     let mut hasher = Sha256::new();
@@ -130,6 +157,7 @@ fn compute_sha256<P: AsRef<Path>>(path: P) -> Result<String> {
     Ok(format!("{:x}", hasher.finalize()))
 }
 
+/// --- Utility: Download model if missing or corrupted ---
 fn download_model(path: &str, url: &str) -> Result<()> {
     if url.is_empty() {
         return Err(anyhow!("Unknown model URL"));
@@ -153,7 +181,8 @@ fn main() {
         .invoke_handler(tauri::generate_handler![
             start_mcp_gateway,
             app_version,
-            verify_active_model
+            verify_active_model,
+            quick_verify_model
         ])
         .setup(|_| {
             println!("⚖️ Counsel AI Desktop initialized");
