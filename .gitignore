@@ -1,6 +1,19 @@
+# Node / Frontend build artifacts
 node_modules/
 dist/
-.data/
-.env
 npm-debug.log
+
+# Environment and runtime data
+.env
+.data/
+
+# Keys and signatures (local/private)
+keys/current.asc
+keys/archive/*.asc
+
+# Local model binaries (never commit)
 services/mcp-gateway/models/*.gguf
+
+# Trusted registry signature & checksum files
+services/mcp-gateway/models/trusted_models.json.asc
+services/mcp-gateway/models/trusted_models.json.sha256
