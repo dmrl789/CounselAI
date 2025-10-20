@@ -1,26 +1,64 @@
+//! Counsel AI Desktop — Local Tauri Backend
+//! Provides safe, offline integration for the React UI.
+//! Exposes commands for starting the MCP gateway and verifying models.
+
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
+use once_cell::sync::Lazy;
 use std::{
     fs,
     io::Read,
     path::Path,
-    process::Command,
+    process::{Command, Stdio},
+    sync::Mutex,
 };
+use tauri::AppHandle;
 
 use anyhow::{anyhow, Result};
 use sha2::{Digest, Sha256};
 
-type StdResult<T, E> = std::result::Result<T, E>;
+// Track MCP gateway status
+static MCP_STATUS: Lazy<Mutex<bool>> = Lazy::new(|| Mutex::new(false));
 
-fn main() {
-    tauri::Builder::default()
-        .invoke_handler(tauri::generate_handler![verify_active_model])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+/// --- Launch Local MCP Gateway ---
+#[tauri::command]
+async fn start_mcp_gateway(_app: AppHandle) -> Result<String, String> {
+    let mut lock = MCP_STATUS.lock().map_err(|_| "Status lock poisoned".to_string())?;
+    if *lock {
+        return Ok("MCP Gateway already running".into());
+    }
+
+    let spawn_result = if cfg!(target_os = "windows") {
+        Command::new("cmd")
+            .args(["/C", "mcp-gateway.exe"])
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .spawn()
+    } else {
+        Command::new("mcp-gateway")
+            .stdout(Stdio::null())
+            .stderr(Stdio::null())
+            .spawn()
+    };
+
+    match spawn_result {
+        Ok(_) => {
+            *lock = true;
+            Ok("MCP Gateway started successfully".into())
+        }
+        Err(e) => Err(format!("Failed to start gateway: {}", e)),
+    }
 }
 
+/// --- Return App Version ---
 #[tauri::command]
-fn verify_active_model() -> StdResult<String, String> {
+fn app_version() -> String {
+    env!("CARGO_PKG_VERSION").to_string()
+}
+
+/// --- Verify Active Local Model ---
+#[tauri::command]
+fn verify_active_model() -> Result<String, String> {
     match verify_or_repair_model() {
         Ok(msg) => Ok(msg),
         Err(e) => Err(format!("Verification failed: {e}")),
@@ -33,7 +71,7 @@ fn verify_or_repair_model() -> Result<String> {
     let model_line = content
         .lines()
         .find(|l| l.starts_with("LOCAL_MODEL_PATH="))
-        .map(|l| l.replace("LOCAL_MODEL_PATH=", "").trim().to_string());
+        .map(|l| l.replacen("LOCAL_MODEL_PATH=", "", 1).trim().to_string());
 
     let Some(path) = model_line else {
         return Err(anyhow!("LOCAL_MODEL_PATH not found in .env"));
@@ -72,23 +110,16 @@ fn verify_or_repair_model() -> Result<String> {
         if new_hash != trusted_hash {
             return Err(anyhow!("Checksum mismatch after re-download."));
         }
-        return Ok(format!(
-            "✅ Model repaired and verified (SHA256: {})",
-            new_hash
-        ));
+        return Ok(format!("✅ Model repaired and verified (SHA256: {})", new_hash));
     }
 
-    Ok(format!(
-        "✅ Model verified successfully (SHA256: {})",
-        computed
-    ))
+    Ok(format!("✅ Model verified successfully (SHA256: {})", computed))
 }
 
 fn compute_sha256<P: AsRef<Path>>(path: P) -> Result<String> {
     let mut file = std::fs::File::open(&path)?;
     let mut hasher = Sha256::new();
     let mut buffer = [0u8; 8192];
-
     loop {
         let bytes_read = file.read(&mut buffer)?;
         if bytes_read == 0 {
@@ -96,7 +127,6 @@ fn compute_sha256<P: AsRef<Path>>(path: P) -> Result<String> {
         }
         hasher.update(&buffer[..bytes_read]);
     }
-
     Ok(format!("{:x}", hasher.finalize()))
 }
 
@@ -115,4 +145,20 @@ fn download_model(path: &str, url: &str) -> Result<()> {
     }
     fs::rename(&tmp, &path)?;
     Ok(())
+}
+
+/// --- App Entry Point ---
+fn main() {
+    tauri::Builder::default()
+        .invoke_handler(tauri::generate_handler![
+            start_mcp_gateway,
+            app_version,
+            verify_active_model
+        ])
+        .setup(|_| {
+            println!("⚖️ Counsel AI Desktop initialized");
+            Ok(())
+        })
+        .run(tauri::generate_context!())
+        .expect("error while running Counsel AI desktop");
 }
