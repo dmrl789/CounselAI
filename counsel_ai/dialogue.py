@@ -8,7 +8,7 @@ from rich.console import Console
 from rich.prompt import Prompt
 
 from .models import CaseFile, Party
-from typing import cast, Literal
+from typing import cast, Literal, NoReturn
 
 console = Console()
 logger = logging.getLogger(__name__)
@@ -36,6 +36,9 @@ def _ask_non_empty(prompt: str, max_attempts: int = 3) -> str:
         except Exception as e:
             logger.error(f"Error in _ask_non_empty: {e}")
             raise
+    
+    # This should never be reached due to the ValueError above
+    raise ValueError("Maximum attempts exceeded for required field")
 
 
 def interactive_intake(existing_case_id: Optional[str] = None) -> CaseFile:
