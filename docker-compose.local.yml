@@ -1,0 +1,72 @@
+version: "3.9"
+
+services:
+  # ----------------------------------------------------
+  # 1. Local MCP Gateway — privacy firewall
+  # ----------------------------------------------------
+  mcp-gateway:
+    container_name: counselai_mcp
+    build:
+      context: ./services/mcp-gateway
+      dockerfile: Dockerfile
+    image: counselai/mcp-gateway:local
+    restart: unless-stopped
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GPT_MODEL=gpt-5
+      - VECTOR_DB_URL=http://qdrant:6333
+      - STORAGE_PATH=/data/encrypted
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      - LOG_LEVEL=info
+    volumes:
+      - ./data:/data
+    ports:
+      - "5142:5142" # REST API
+    networks:
+      - counsel_net
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5142/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # ----------------------------------------------------
+  # 2. Qdrant — local vector database
+  # ----------------------------------------------------
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: counselai_qdrant
+    restart: unless-stopped
+    environment:
+      QDRANT__STORAGE__PATH: /qdrant/storage
+      QDRANT__SERVICE__GRPC_PORT: 6334
+    volumes:
+      - ./data/qdrant:/qdrant/storage
+    ports:
+      - "6333:6333" # REST API
+      - "6334:6334" # gRPC API
+    networks:
+      - counsel_net
+
+  # ----------------------------------------------------
+  # 3. Desktop UI (React + Tauri)
+  # ----------------------------------------------------
+  ui-desktop:
+    container_name: counselai_ui
+    build:
+      context: ./apps/ui-desktop
+      dockerfile: Dockerfile
+    image: counselai/ui-desktop:local
+    restart: unless-stopped
+    environment:
+      - MCP_API_URL=http://mcp-gateway:5142
+    ports:
+      - "5173:5173" # local web port
+    depends_on:
+      - mcp-gateway
+    networks:
+      - counsel_net
+
+networks:
+  counsel_net:
+    driver: bridge
