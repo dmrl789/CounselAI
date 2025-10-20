@@ -11,8 +11,8 @@ class Party(BaseModel):
     role: Literal[
         "Ricorrente", "Resistente", "Attore", "Convenuto", "Cliente", "Controparte"
     ]
-    
-    @field_validator('name')
+
+    @field_validator("name")
     @classmethod
     def validate_name(cls, v):
         if not v or not v.strip():
@@ -28,8 +28,8 @@ class CaseFile(BaseModel):
     jurisdiction: Optional[str] = None
     applicable_law: List[str] = Field(default_factory=list)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-    
-    @field_validator('case_id')
+
+    @field_validator("case_id")
     @classmethod
     def validate_case_id(cls, v):
         if not v or not v.strip():

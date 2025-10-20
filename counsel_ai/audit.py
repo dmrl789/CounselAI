@@ -70,7 +70,7 @@ def append_record(action: str, payload: dict) -> str:
                 with LEDGER_FILE.open("r", encoding="utf-8") as src:
                     with temp_file.open("w", encoding="utf-8") as dst:
                         dst.write(src.read())
-            
+
             # Append new record
             with temp_file.open("a", encoding="utf-8") as f:
                 f.write(json.dumps(rec) + "\n")
