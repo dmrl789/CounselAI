@@ -8,6 +8,7 @@ from rich.console import Console
 from rich.prompt import Prompt
 
 from .models import CaseFile, Party
+from typing import cast, Literal
 
 console = Console()
 logger = logging.getLogger(__name__)
@@ -49,7 +50,7 @@ def interactive_intake(existing_case_id: Optional[str] = None) -> CaseFile:
         client_name = _ask_non_empty("Nome cliente")
         logger.info(f"Client name: {client_name}")
 
-        client_role = Prompt.ask(
+        client_role: str = Prompt.ask(
             "Ruolo cliente",
             choices=[
                 "Ricorrente",
@@ -105,8 +106,8 @@ def interactive_intake(existing_case_id: Optional[str] = None) -> CaseFile:
 
         case_file = CaseFile(
             case_id=case_id,
-            client=Party(name=client_name, role=client_role),
-            parties=[Party(name=client_name, role=client_role)],
+            client=Party(name=client_name, role=cast(Literal["Ricorrente", "Resistente", "Attore", "Convenuto", "Cliente", "Controparte"], client_role)),
+            parties=[Party(name=client_name, role=cast(Literal["Ricorrente", "Resistente", "Attore", "Convenuto", "Cliente", "Controparte"], client_role))],
             facts=facts,
             jurisdiction=jurisdiction,
             applicable_law=applicable_law,

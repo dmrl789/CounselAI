@@ -14,7 +14,7 @@ class Party(BaseModel):
 
     @field_validator("name")
     @classmethod
-    def validate_name(cls, v):
+    def validate_name(cls, v: str) -> str:
         if not v or not v.strip():
             raise ValueError("Party name cannot be empty")
         return v.strip()
@@ -31,7 +31,7 @@ class CaseFile(BaseModel):
 
     @field_validator("case_id")
     @classmethod
-    def validate_case_id(cls, v):
+    def validate_case_id(cls, v: str) -> str:
         if not v or not v.strip():
             raise ValueError("Case ID cannot be empty")
         return v.strip()
