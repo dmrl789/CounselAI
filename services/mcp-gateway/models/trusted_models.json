@@ -1,3 +1,35 @@
 {
-  "models": []
+  "registry_version": 1,
+  "issued_at": "2025-10-20T00:00:00Z",
+  "expires_at": "2026-10-20T00:00:00Z",
+  "models": [
+    {
+      "id": "counsel-llm-italian-v1",
+      "provider": "counsel-ai",
+      "license": "proprietary",
+      "sha256": "7a3c3ff4c5b76b76979e3c927ab0fb70d137e75ebf70d0da0b175d5b4e6a3f0b",
+      "uri": "https://example.com/models/counsel-llm-italian-v1.bin"
+    },
+    {
+      "id": "counsel-llm-italian-v1-instruct",
+      "provider": "counsel-ai",
+      "license": "proprietary",
+      "sha256": "f3d3c6b4cbb9d7e2140d0c680ea3c5f8d9b77bd3b53d141a6ba2d6748cd2eb2f",
+      "uri": "https://example.com/models/counsel-llm-italian-v1-instruct.bin"
+    },
+    {
+      "id": "phi-3-mini-4k-instruct.Q4_K_M.gguf",
+      "provider": "huggingface/TheBloke",
+      "license": "apache-2.0",
+      "sha256": "a21ad4c26f53211e39df6b374f640093226f55da16d3f7a7c10c3a90ab5c04b2",
+      "uri": "https://huggingface.co/TheBloke/phi-3-mini-4k-instruct-GGUF/resolve/main/phi-3-mini-4k-instruct.Q4_K_M.gguf"
+    },
+    {
+      "id": "mistral-7b-instruct.Q4_K_M.gguf",
+      "provider": "huggingface/TheBloke",
+      "license": "apache-2.0",
+      "sha256": "c9b84e2cb9d5e547faefab7b9b2a8cc73e2e9ab31dd23842fbbfc97b5670a708",
+      "uri": "https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.2-GGUF/resolve/main/mistral-7b-instruct-v0.2.Q4_K_M.gguf"
+    }
+  ]
 }
