@@ -21,7 +21,7 @@ It operates through a **local Model Context Protocol (MCP)** that guarantees *ze
 | **Self-Healing** | Damaged or missing models automatically re-downloaded and re-verified. |
 | **Offline Resilience** | When offline or no API key, Counsel AI uses local LLM (Mistral 7B / Phi-3 GGUF via `llama.cpp`). |
 
----
+--- 
 
 ## **3. System Architecture**
 
