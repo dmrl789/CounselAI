@@ -1,6 +1,6 @@
 import pytest
-from datetime import datetime
-from counsel_ai.models import Party, CaseFile, ReasoningNode, ReasoningTree, Opinion
+
+from counsel_ai.models import CaseFile, Opinion, Party, ReasoningNode, ReasoningTree
 
 
 class TestParty:
@@ -12,7 +12,7 @@ class TestParty:
     def test_party_validation(self):
         with pytest.raises(ValueError):
             Party(name="", role="Cliente")
-        
+
         with pytest.raises(ValueError):
             Party(name="Test", role="InvalidRole")
 
@@ -24,7 +24,7 @@ class TestCaseFile:
             case_id="HT-2025-0001",
             client=client,
             facts=["Test fact 1", "Test fact 2"],
-            applicable_law=["art. 1218 c.c."]
+            applicable_law=["art. 1218 c.c."],
         )
         assert case.case_id == "HT-2025-0001"
         assert len(case.facts) == 2
@@ -41,7 +41,7 @@ class TestReasoningNode:
             id="test-node",
             claim="Test claim",
             supports=["Support 1", "Support 2"],
-            citations=["Citation 1"]
+            citations=["Citation 1"],
         )
         assert node.id == "test-node"
         assert node.claim == "Test claim"
@@ -51,17 +51,8 @@ class TestReasoningNode:
 
 class TestReasoningTree:
     def test_reasoning_tree_creation(self):
-        root = ReasoningNode(
-            id="root",
-            claim="Root claim",
-            supports=[],
-            citations=[]
-        )
-        tree = ReasoningTree(
-            root_id="root",
-            nodes=[root],
-            summary="Test summary"
-        )
+        root = ReasoningNode(id="root", claim="Root claim", supports=[], citations=[])
+        tree = ReasoningTree(root_id="root", nodes=[root], summary="Test summary")
         assert tree.root_id == "root"
         assert len(tree.nodes) == 1
         assert tree.summary == "Test summary"
@@ -74,7 +65,7 @@ class TestOpinion:
             title="Test Opinion",
             summary="Test summary",
             recommendations=["Recommendation 1"],
-            citations=["Citation 1"]
+            citations=["Citation 1"],
         )
         assert opinion.case_id == "HT-2025-0001"
         assert opinion.title == "Test Opinion"
