@@ -39,6 +39,85 @@ It operates through its own **protected Model Context Protocol (MCP)** enclave, 
 
 ---
 
+### 🧭 System Architecture Diagram
+
+```mermaid
+flowchart TD
+  %% === UI LAYER ===
+  subgraph UI["🖥️ Counsel AI Desktop UI (Tauri + React)"]
+    U1[Chat Interface & File Uploader]
+    U2[Model Manager + Verifier Panel]
+    U3[User Local Logs & Encrypted Storage]
+    U1 -->|Query JSON| M1
+    U2 -->|Model Selection| M1
+  end
+
+  %% === MCP LAYER ===
+  subgraph MCP["⚙️ Local MCP Gateway (Rust + Axum)"]
+    M1[/Query → Context Sanitizer/]
+    M2[/Reasoner Router / Offline Fallback/]
+    M3[/Verifier + Logger/]
+    M1 --> M2 --> M3
+  end
+
+  %% === MODEL LAYER ===
+  subgraph MODELS["🧠 Reasoning Engines"]
+    C1[GPT-5 Cloud Reasoner]
+    C2[Local LLM (Mistral 7B / Phi-3 GGUF)]
+  end
+  M2 -->|API if key present| C1
+  M2 -->|Offline Fallback| C2
+
+  %% === TRUST LAYER ===
+  subgraph TRUST["🔒 Trust & Verification Subsystem"]
+    R1[trusted_models.json 📜]
+    R2[PGP Signature ( trusted_models.json.asc ) ]
+    R3[Public Key (keys/current.asc)]
+    R4[Key Manager 🔑 rotate / archive]
+    R5[Model Verifier ( SHA-256 + Auto-Repair )]
+    R1 --> R2 --> R3 --> R4 --> R5
+  end
+  TRUST --> MCP
+
+  %% === STORAGE & DATABASE ===
+  subgraph DATA["🗄️ Local Storage & Vector DB"]
+    D1[Encrypted Opinions / Logs]
+    D2[Qdrant / SQLite Legal KB]
+  end
+  MCP --> DATA
+
+  %% === FLOW LABELS ===
+  U1 -. Sanitized Query .-> M1
+  M3 -. Verified Response .-> U1
+  TRUST -. Supplies Hashes + Keys .-> M3
+  C1 -. Stateless Reasoning .-> M3
+  C2 -. Local Inference .-> M3
+```
+
+---
+
+### 🧩 Legend
+
+| Symbol           | Meaning                                         |
+| ---------------- | ----------------------------------------------- |
+| **UI block**     | Local user interface (React + Tauri)            |
+| **MCP block**    | Rust gateway: sanitization + routing            |
+| **MODELS block** | Cloud (GPT-5) or local (Mistral/Phi-3) reasoner |
+| **TRUST block**  | Registry, signature, and key infrastructure     |
+| **DATA block**   | Encrypted opinions + legal knowledge base       |
+
+---
+
+### ✅ Flow Summary
+
+1. User inputs a legal query → MCP sanitizes context.
+2. MCP routes to GPT-5 or offline LLM based on connectivity.
+3. Results are verified, re-contextualized, and logged locally.
+4. Model Verifier checks registry signature + hash chain on every launch.
+5. Key Manager rotates signing keys and updates the Trusted Registry securely.
+
+---
+
 ## 4. Functional Requirements
 
 ### 4.1 Legal Reasoning Engine

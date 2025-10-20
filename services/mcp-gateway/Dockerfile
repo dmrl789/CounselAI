@@ -10,8 +10,9 @@ WORKDIR /app
 # Install required build dependencies
 RUN apt-get update && apt-get install -y pkg-config libssl-dev curl && rm -rf /var/lib/apt/lists/*
 
-# Copy source files
-COPY . .
+# Copy project files
+COPY Cargo.toml Cargo.lock ./
+COPY src ./src
 
 # Build release binary
 RUN cargo build --release
@@ -23,21 +24,22 @@ FROM debian:bookworm-slim
 WORKDIR /app
 
 # Install minimal runtime dependencies
-RUN apt-get update && apt-get install -y ca-certificates curl && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y --no-install-recommends ca-certificates curl && rm -rf /var/lib/apt/lists/*
 
-# Copy binary from builder
+# Copy compiled binary
 COPY --from=builder /app/target/release/mcp-gateway /usr/local/bin/mcp-gateway
 
-# Create data directories
-RUN mkdir -p /data/encrypted && mkdir -p /logs
+# Create runtime directories
+RUN mkdir -p /data/encrypted /logs
+
+# Environment
+ENV RUST_LOG=info
 
 # Expose REST API
 EXPOSE 5142
 
-ENV RUST_LOG=info
-
-# Health check endpoint
+# Health check for Docker
 HEALTHCHECK CMD curl -f http://localhost:5142/health || exit 1
 
 # Run the gateway
-CMD ["mcp-gateway"]
+CMD ["/usr/local/bin/mcp-gateway"]
