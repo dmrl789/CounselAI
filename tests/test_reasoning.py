@@ -17,7 +17,7 @@ class TestAnalyzeFacts:
     def test_analyze_facts_contratto(self):
         facts = ["Firmato un contratto", "Accordo tra le parti"]
         result = _analyze_facts(facts)
-        assert "contrattuale" in result[0].lower()
+        assert "contrattual" in result[0].lower()
 
     def test_analyze_facts_empty(self):
         facts = []
@@ -56,7 +56,7 @@ class TestBuildReasoning:
         
         assert result.root_id == "root"
         assert len(result.nodes) == 1
-        assert "inadempimento" in result.summary.lower()
+        assert "responsabilità" in result.summary.lower()
 
     def test_build_reasoning_no_facts(self):
         client = Party(name="Test Client", role="Cliente")

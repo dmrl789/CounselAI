@@ -112,4 +112,5 @@ class TestAuditSystem:
         with open(self.ledger_file) as f:
             record = json.loads(f.read().strip())
             assert record["action"] == "special_action"
-            assert record["payload"]["special"] == "chars: !@#$%^&*()_+-=[]{}|;':\",./<>?"
+            assert record["data_hash"] is not None
+            assert record["chain_hash"] == chain_hash

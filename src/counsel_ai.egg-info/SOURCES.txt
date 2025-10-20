@@ -1,0 +1,12 @@
+README.md
+pyproject.toml
+src/counsel_ai.egg-info/PKG-INFO
+src/counsel_ai.egg-info/SOURCES.txt
+src/counsel_ai.egg-info/dependency_links.txt
+src/counsel_ai.egg-info/entry_points.txt
+src/counsel_ai.egg-info/requires.txt
+src/counsel_ai.egg-info/top_level.txt
+tests/test_audit.py
+tests/test_dialogue.py
+tests/test_models.py
+tests/test_reasoning.py
