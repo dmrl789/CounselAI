@@ -1,7 +1,7 @@
 from __future__ import annotations
 from typing import List, Optional, Literal
 from pydantic import BaseModel, Field
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 class Party(BaseModel):
@@ -16,7 +16,7 @@ class CaseFile(BaseModel):
     facts: List[str] = Field(default_factory=list)
     jurisdiction: Optional[str] = None
     applicable_law: List[str] = Field(default_factory=list)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class ReasoningNode(BaseModel):
@@ -24,7 +24,7 @@ class ReasoningNode(BaseModel):
     claim: str
     supports: List[str] = Field(default_factory=list)
     citations: List[str] = Field(default_factory=list)
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class ReasoningTree(BaseModel):
@@ -39,4 +39,4 @@ class Opinion(BaseModel):
     summary: str
     recommendations: List[str]
     citations: List[str]
-    generated_at: datetime = Field(default_factory=datetime.utcnow)
+    generated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))

@@ -78,6 +78,8 @@ class TestInteractiveIntake:
     def test_interactive_intake_validation_error(self, mock_prompt):
         mock_prompt.side_effect = [
             "",  # empty case_id should cause validation error
+            "",  # second attempt
+            "",  # third attempt - should trigger max attempts exceeded
         ]
         
         with pytest.raises(ValueError, match="Maximum attempts exceeded"):
