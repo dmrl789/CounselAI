@@ -105,7 +105,7 @@ def opinion(
 def export(
     case_path: Path = typer.Argument(..., help="Path a CaseFile.json"),
     opinion_path: Path = typer.Argument(..., help="Path a Opinion.json"),
-):
+) -> None:
     """Export case and opinion to DOCX and PDF documents"""
     try:
         logger.info(
