@@ -38,16 +38,16 @@ flowchart TD
 
   %% === MCP LAYER ===
   subgraph MCP["⚙️ Local MCP Gateway (Rust + Axum)"]
-    M1[/Context Sanitizer + Router/]
-    M2[/Reasoner + Offline Fallback/]
-    M3[/Verifier + Logger/]
+    M1[/"Context Sanitizer + Router"/]
+    M2[/"Reasoner + Offline Fallback"/]
+    M3[/"Verifier + Logger"/]
     M1 --> M2 --> M3
   end
 
   %% === MODEL LAYER ===
   subgraph MODELS["🧠 Reasoning Engines"]
     C1[GPT-5 Cloud Reasoner]
-    C2[Local LLM (Mistral 7B / Phi-3 GGUF)]
+    C2["Local LLM (Mistral 7B / Phi-3 GGUF)"]
   end
   M2 --> |API if key present| C1
   M2 --> |Offline Fallback| C2
@@ -55,10 +55,10 @@ flowchart TD
   %% === TRUST LAYER ===
   subgraph TRUST["🔒 Trust & Verification Subsystem"]
     R1[trusted_models.json 📜]
-    R2[PGP Signature (trusted_models.json.asc)]
-    R3[Public Key (keys/current.asc)]
-    R4[Key Manager 🔑 rotate / archive]
-    R5[Model Verifier (SHA-256 + Auto-Repair)]
+    R2["PGP Signature (trusted_models.json.asc)"]
+    R3["Public Key (keys/current.asc)"]
+    R4["Key Manager 🔑 rotate / archive"]
+    R5["Model Verifier (SHA-256 + Auto-Repair)"]
     R1 --> R2 --> R3 --> R4 --> R5
   end
   TRUST --> MCP
