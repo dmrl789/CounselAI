@@ -3,3 +3,7 @@ dist/
 .data/
 .env
 npm-debug.log
+keys/current.asc
+keys/archive/*.asc
+services/mcp-gateway/models/trusted_models.json.asc
+services/mcp-gateway/models/trusted_models.json.sha256
