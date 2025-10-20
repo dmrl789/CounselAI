@@ -28,7 +28,7 @@ It operates through a **local Model Context Protocol (MCP)** that guarantees *ze
 ```mermaid
 flowchart TD
   %% === UI LAYER ===
-  subgraph UI["🖥️ Counsel AI Desktop UI (Tauri + React)"]
+  subgraph UI["🖥️ Counsel AI Desktop UI #40;Tauri + React#41;"]
     U1[Chat Interface & File Uploader]
     U2[Model Manager + Verifier Panel]
     U3[Local Encrypted Storage]
@@ -37,7 +37,7 @@ flowchart TD
   end
 
   %% === MCP LAYER ===
-  subgraph MCP["⚙️ Local MCP Gateway (Rust + Axum)"]
+  subgraph MCP["⚙️ Local MCP Gateway #40;Rust + Axum#41;"]
     M1[/Context Sanitizer + Router/]
     M2[/Reasoner + Offline Fallback/]
     M3[/Verifier + Logger/]
@@ -47,7 +47,7 @@ flowchart TD
   %% === MODEL LAYER ===
   subgraph MODELS["🧠 Reasoning Engines"]
     C1[GPT-5 Cloud Reasoner]
-    C2[Local LLM (Mistral 7B / Phi-3 GGUF)]
+    C2[Local LLM #40;Mistral 7B / Phi-3 GGUF#41;]
   end
   M2 --> |API if key present| C1
   M2 --> |Offline Fallback| C2
@@ -55,10 +55,10 @@ flowchart TD
   %% === TRUST LAYER ===
   subgraph TRUST["🔒 Trust & Verification Subsystem"]
     R1[trusted_models.json 📜]
-    R2[PGP Signature (trusted_models.json.asc)]
-    R3[Public Key (keys/current.asc)]
+    R2[PGP Signature #40;trusted_models.json.asc#41;]
+    R3[Public Key #40;keys/current.asc#41;]
     R4[Key Manager 🔑 rotate / archive]
-    R5[Model Verifier (SHA-256 + Auto-Repair)]
+    R5[Model Verifier #40;SHA-256 + Auto-Repair#41;]
     R1 --> R2 --> R3 --> R4 --> R5
   end
   TRUST --> MCP
