@@ -1,6 +1,7 @@
-import tempfile
 import json
+import tempfile
 from pathlib import Path
+
 from counsel_ai.audit import append_record, verify_ledger_integrity
 
 
@@ -12,6 +13,7 @@ class TestAuditSystem:
 
         # Mock the global variables
         import counsel_ai.audit as audit_module
+
         self.original_audit_dir = audit_module.AUDIT_DIR
         self.original_ledger_file = audit_module.LEDGER_FILE
 
@@ -21,6 +23,7 @@ class TestAuditSystem:
     def teardown_method(self):
         # Restore original values
         import counsel_ai.audit as audit_module
+
         audit_module.AUDIT_DIR = self.original_audit_dir
         audit_module.LEDGER_FILE = self.original_ledger_file
 
@@ -111,4 +114,6 @@ class TestAuditSystem:
         with open(self.ledger_file) as f:
             record = json.loads(f.read().strip())
             assert record["action"] == "special_action"
-            assert record["payload"]["special"] == "chars: !@#$%^&*()_+-=[]{}|;':\",./<>?"
+            assert (
+                record["payload"]["special"] == "chars: !@#$%^&*()_+-=[]{}|;':\",./<>?"
+            )

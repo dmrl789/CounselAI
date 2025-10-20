@@ -1,10 +1,13 @@
 from __future__ import annotations
+
 import logging
 from typing import Optional
+
 from pydantic import ValidationError
-from rich.prompt import Prompt, Confirm
 from rich.console import Console
-from .models import Party, CaseFile
+from rich.prompt import Prompt
+
+from .models import CaseFile, Party
 
 console = Console()
 logger = logging.getLogger(__name__)
@@ -21,7 +24,8 @@ def _ask_non_empty(prompt: str, max_attempts: int = 3) -> str:
             attempts += 1
             if attempts < max_attempts:
                 console.print(
-                    f"[red]Campo obbligatorio, riprova ({attempts}/{max_attempts}).[/red]")
+                    f"[red]Campo obbligatorio, riprova ({attempts}/{max_attempts}).[/red]"
+                )
             else:
                 console.print("[red]Troppi tentativi falliti.[/red]")
                 raise ValueError("Maximum attempts exceeded for required field")
@@ -78,7 +82,8 @@ def interactive_intake(existing_case_id: Optional[str] = None) -> CaseFile:
 
         applicable_law: list[str] = []
         console.print(
-            "Norme/casi applicabili (es. 'art. 1218 c.c.', 'Cass. Civ. 30574/2022')")
+            "Norme/casi applicabili (es. 'art. 1218 c.c.', 'Cass. Civ. 30574/2022')"
+        )
         law_count = 0
         while law_count < 20:  # Reasonable limit
             try:
@@ -93,9 +98,9 @@ def interactive_intake(existing_case_id: Optional[str] = None) -> CaseFile:
 
         logger.info(f"Collected {len(applicable_law)} applicable laws")
 
-        jurisdiction = Prompt.ask(
-            "Giurisdizione (es. Tribunale di Milano)",
-            default="") or None
+        jurisdiction = (
+            Prompt.ask("Giurisdizione (es. Tribunale di Milano)", default="") or None
+        )
         logger.info(f"Jurisdiction: {jurisdiction}")
 
         case_file = CaseFile(

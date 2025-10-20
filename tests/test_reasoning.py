@@ -1,11 +1,18 @@
-from counsel_ai.reasoning import build_reasoning, draft_opinion, _analyze_facts, _analyze_applicable_law
 from counsel_ai.models import CaseFile, Party
+from counsel_ai.reasoning import (
+    _analyze_applicable_law,
+    _analyze_facts,
+    build_reasoning,
+    draft_opinion,
+)
 
 
 class TestAnalyzeFacts:
     def test_analyze_facts_inadempimento(self):
-        facts = ["Il debitore non ha pagato la rata",
-                 "Mancato pagamento della somma dovuta"]
+        facts = [
+            "Il debitore non ha pagato la rata",
+            "Mancato pagamento della somma dovuta",
+        ]
         result = _analyze_facts(facts)
         assert "inadempimento" in result[0].lower()
 
@@ -49,7 +56,7 @@ class TestBuildReasoning:
             case_id="HT-2025-0001",
             client=client,
             facts=["Il debitore non ha pagato"],
-            applicable_law=["art. 1218 c.c."]
+            applicable_law=["art. 1218 c.c."],
         )
 
         result = build_reasoning(case)
@@ -61,10 +68,7 @@ class TestBuildReasoning:
     def test_build_reasoning_no_facts(self):
         client = Party(name="Test Client", role="Cliente")
         case = CaseFile(
-            case_id="HT-2025-0001",
-            client=client,
-            facts=[],
-            applicable_law=[]
+            case_id="HT-2025-0001", client=client, facts=[], applicable_law=[]
         )
 
         result = build_reasoning(case)
@@ -79,7 +83,7 @@ class TestBuildReasoning:
             case_id="HT-2025-0001",
             client=client,
             facts=["Test fact"],
-            applicable_law=["art. 1218 c.c."]
+            applicable_law=["art. 1218 c.c."],
         )
 
         result = build_reasoning(case)
@@ -96,7 +100,7 @@ class TestDraftOpinion:
             case_id="HT-2025-0001",
             client=client,
             facts=["Il debitore non ha pagato"],
-            applicable_law=["art. 1218 c.c."]
+            applicable_law=["art. 1218 c.c."],
         )
 
         reasoning = build_reasoning(case)
@@ -110,10 +114,7 @@ class TestDraftOpinion:
     def test_draft_opinion_error_handling(self):
         client = Party(name="Test Client", role="Cliente")
         case = CaseFile(
-            case_id="HT-2025-0001",
-            client=client,
-            facts=[],
-            applicable_law=[]
+            case_id="HT-2025-0001", client=client, facts=[], applicable_law=[]
         )
 
         reasoning = build_reasoning(case)

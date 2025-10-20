@@ -1,8 +1,10 @@
 from __future__ import annotations
+
 import logging
-from typing import List
 from datetime import datetime
-from .models import CaseFile, ReasoningNode, ReasoningTree, Opinion
+from typing import List
+
+from .models import CaseFile, Opinion, ReasoningNode, ReasoningTree
 
 logger = logging.getLogger(__name__)
 
@@ -60,14 +62,16 @@ def build_reasoning(case: CaseFile) -> ReasoningTree:
         # Return a basic reasoning tree in case of error
         return ReasoningTree(
             root_id="error",
-            nodes=[ReasoningNode(
-                id="error",
-                claim="Errore nell'analisi del caso",
-                supports=["Errore tecnico"],
-                citations=[],
-                timestamp=datetime.utcnow(),
-            )],
-            summary="Errore nell'analisi del caso. Consultare i log per dettagli."
+            nodes=[
+                ReasoningNode(
+                    id="error",
+                    claim="Errore nell'analisi del caso",
+                    supports=["Errore tecnico"],
+                    citations=[],
+                    timestamp=datetime.utcnow(),
+                )
+            ],
+            summary="Errore nell'analisi del caso. Consultare i log per dettagli.",
         )
 
 
@@ -78,14 +82,17 @@ def _analyze_facts(facts: List[str]) -> List[str]:
     for fact in facts:
         fact_lower = fact.lower()
         if any(
-            keyword in fact_lower for keyword in [
-                "inadempimento",
-                "mancato pagamento",
-                "ritardo"]):
+            keyword in fact_lower
+            for keyword in ["inadempimento", "mancato pagamento", "ritardo"]
+        ):
             analysis.append("Sussistono profili di inadempimento ex art. 1218 c.c.")
-        elif any(keyword in fact_lower for keyword in ["danno", "lesione", "pregiudizio"]):
+        elif any(
+            keyword in fact_lower for keyword in ["danno", "lesione", "pregiudizio"]
+        ):
             analysis.append("Presenza di elementi di danno risarcibile")
-        elif any(keyword in fact_lower for keyword in ["contratto", "accordo", "convenzione"]):
+        elif any(
+            keyword in fact_lower for keyword in ["contratto", "accordo", "convenzione"]
+        ):
             analysis.append("Rilevante presenza di accordi contrattuali")
 
     return analysis
@@ -98,7 +105,8 @@ def _analyze_applicable_law(applicable_law: List[str]) -> List[str]:
     for law in applicable_law:
         if "art. 1218" in law:
             analysis.append(
-                "Applicazione dell'art. 1218 c.c. per responsabilità contrattuale")
+                "Applicazione dell'art. 1218 c.c. per responsabilità contrattuale"
+            )
         elif "Cass." in law or "Cassazione" in law:
             analysis.append("Rilevanza della giurisprudenza di legittimità")
         elif "Trib." in law or "Tribunale" in law:
@@ -121,7 +129,8 @@ def draft_opinion(case: CaseFile, reasoning: ReasoningTree) -> Opinion:
         # Ensure we have at least one recommendation
         if not recommendations:
             recommendations.append(
-                "Raccogliere documentazione integrativa e chiarire i fatti rilevanti")
+                "Raccogliere documentazione integrativa e chiarire i fatti rilevanti"
+            )
 
         title = f"Parere legale su pratica {case.case_id}"
         summary = reasoning.summary
@@ -135,8 +144,8 @@ def draft_opinion(case: CaseFile, reasoning: ReasoningTree) -> Opinion:
         )
 
         logger.info(
-            f"Successfully drafted opinion with {
-                len(recommendations)} recommendations")
+            f"Successfully drafted opinion with {len(recommendations)} recommendations"
+        )
         return opinion
 
     except Exception as e:
@@ -144,8 +153,7 @@ def draft_opinion(case: CaseFile, reasoning: ReasoningTree) -> Opinion:
         # Return a basic opinion in case of error
         return Opinion(
             case_id=case.case_id,
-            title=f"Parere legale su pratica {
-                case.case_id} (ERRORE)",
+            title=f"Parere legale su pratica {case.case_id} (ERRORE)",
             summary="Errore nella generazione del parere. Consultare i log per dettagli.",
             recommendations=["Consultare un legale per assistenza"],
             citations=[],
@@ -158,12 +166,14 @@ def _generate_recommendations(summary: str, facts: List[str]) -> List[str]:
 
     if "inadempimento" in summary.lower():
         recommendations.append(
-            "Valutare diffida ad adempiere e successiva azione per risoluzione/danni")
+            "Valutare diffida ad adempiere e successiva azione per risoluzione/danni"
+        )
         recommendations.append("Documentare l'inadempimento con prova scritta")
 
     if "danno" in summary.lower():
         recommendations.append(
-            "Quantificare il danno subito con documentazione probatoria")
+            "Quantificare il danno subito con documentazione probatoria"
+        )
         recommendations.append("Valutare azione per risarcimento danni")
 
     if "contratto" in summary.lower():
@@ -172,7 +182,8 @@ def _generate_recommendations(summary: str, facts: List[str]) -> List[str]:
 
     if not recommendations:
         recommendations.append(
-            "Raccogliere documentazione integrativa e chiarire i fatti rilevanti")
+            "Raccogliere documentazione integrativa e chiarire i fatti rilevanti"
+        )
         recommendations.append("Consultare la normativa applicabile al caso specifico")
 
     return recommendations

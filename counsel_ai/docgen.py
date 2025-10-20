@@ -1,13 +1,14 @@
 from __future__ import annotations
+
 import logging
 from pathlib import Path
 from typing import Dict
-from jinja2 import Environment, FileSystemLoader, select_autoescape, TemplateNotFound
+
 from docx import Document
-from reportlab.pdfgen import canvas
+from jinja2 import Environment, FileSystemLoader, TemplateNotFound, select_autoescape
 from reportlab.lib.pagesizes import A4
-from reportlab.pdfbase import pdfmetrics
-from reportlab.pdfbase.ttfonts import TTFont
+from reportlab.pdfgen import canvas
+
 from .models import CaseFile, Opinion
 
 logger = logging.getLogger(__name__)
@@ -29,8 +30,7 @@ def render_parere_text(case: CaseFile, opinion: Opinion) -> str:
             raise FileNotFoundError(f"Templates directory not found: {TEMPLATES_DIR}")
 
         env = Environment(
-            loader=FileSystemLoader(str(TEMPLATES_DIR)),
-            autoescape=select_autoescape()
+            loader=FileSystemLoader(str(TEMPLATES_DIR)), autoescape=select_autoescape()
         )
 
         try:
@@ -167,7 +167,6 @@ def generate_documents(case: CaseFile, opinion: Opinion) -> Dict[str, str]:
 
     except Exception as e:
         logger.error(
-            f"Error generating documents for case {
-                case.case_id}: {e}",
-            exc_info=True)
+            f"Error generating documents for case {case.case_id}: {e}", exc_info=True
+        )
         raise
