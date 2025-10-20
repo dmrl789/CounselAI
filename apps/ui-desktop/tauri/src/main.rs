@@ -1,11 +1,12 @@
 //! Counsel AI Desktop — Local Tauri Backend
 //! Provides safe, offline integration for the React UI.
-//! Includes gateway control, full model verification, lightweight background checks,
+//! Includes gateway control, full model verification from trusted registry,
 //! and local model management commands for install/activation.
 
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use once_cell::sync::Lazy;
+use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::{
     fs,
@@ -16,10 +17,27 @@ use std::{
 };
 use tauri::AppHandle;
 use anyhow::{anyhow, Result};
-use serde::{Serialize, Deserialize};
 
 /// Track MCP gateway runtime state
 static MCP_STATUS: Lazy<Mutex<bool>> = Lazy::new(|| Mutex::new(false));
+
+/// --- Registry Structures ---
+#[derive(Deserialize)]
+struct TrustedRegistry {
+    registry_version: u32,
+    issued_at: String,
+    expires_at: String,
+    models: Vec<TrustedModel>,
+}
+
+#[derive(Deserialize)]
+struct TrustedModel {
+    id: String,
+    provider: String,
+    license: String,
+    sha256: String,
+    uri: String,
+}
 
 /// --- Data Structures for Model Management ---
 #[derive(Serialize, Deserialize)]
@@ -127,13 +145,10 @@ fn set_active_model(model_path: String) -> Result<String, String> {
     Ok(format!("Active model set to {}", model_path))
 }
 
-/// --- Full Verify or Repair Active Model ---
+/// --- Verify Active Model from Trusted Registry ---
 #[tauri::command]
 fn verify_active_model() -> Result<String, String> {
-    match verify_or_repair_model() {
-        Ok(msg) => Ok(msg),
-        Err(e) => Err(format!("Verification failed: {e}")),
-    }
+    verify_or_repair_model_from_registry().map_err(|e| format!("Verification failed: {e}"))
 }
 
 /// --- Lightweight background verification (hash-only, non-repairing) ---
@@ -162,56 +177,51 @@ fn quick_verify_model() -> Result<String, String> {
     Ok(format!("✅ Model SHA256: {}", hash))
 }
 
-/// --- Helper: Full verify or repair ---
-fn verify_or_repair_model() -> Result<String> {
+/// --- Helper: Full verification or repair via registry ---
+fn verify_or_repair_model_from_registry() -> Result<String> {
+    let registry_path = Path::new("services/mcp-gateway/models/trusted_models.json");
+    let registry_data = fs::read_to_string(registry_path)
+        .map_err(|_| anyhow!("trusted_models.json not found"))?;
+    let registry: TrustedRegistry = serde_json::from_str(&registry_data)?;
+
     let env_path = Path::new(".env");
-    let content = fs::read_to_string(env_path).unwrap_or_default();
-    let model_line = content
+    let env_content = fs::read_to_string(env_path).unwrap_or_default();
+    let active_path = env_content
         .lines()
         .find(|l| l.starts_with("LOCAL_MODEL_PATH="))
-        .map(|l| l.replacen("LOCAL_MODEL_PATH=", "", 1).trim().to_string());
+        .map(|l| l.replacen("LOCAL_MODEL_PATH=", "", 1).trim().to_string())
+        .ok_or_else(|| anyhow!("LOCAL_MODEL_PATH not set in .env"))?;
 
-    let Some(path) = model_line else {
-        return Err(anyhow!("LOCAL_MODEL_PATH not found in .env"));
-    };
-
-    let file_name = Path::new(&path)
+    let file_name = Path::new(&active_path)
         .file_name()
         .and_then(|f| f.to_str())
-        .unwrap_or("");
+        .ok_or_else(|| anyhow!("Invalid model path"))?;
 
-    let (url, trusted_hash) = match file_name {
-        "mistral-7b-instruct.Q4_K_M.gguf" => (
-            "https://huggingface.co/TheBloke/Mistral-7B-Instruct-v0.2-GGUF/resolve/main/mistral-7b-instruct-v0.2.Q4_K_M.gguf",
-            "c9b84e2cb9d5e547faefab7b9b2a8cc73e2e9ab31dd23842fbbfc97b5670a708",
-        ),
-        "phi-3-mini-4k-instruct.Q4_K_M.gguf" => (
-            "https://huggingface.co/TheBloke/phi-3-mini-4k-instruct-GGUF/resolve/main/phi-3-mini-4k-instruct.Q4_K_M.gguf",
-            "a21ad4c26f53211e39df6b374f640093226f55da16d3f7a7c10c3a90ab5c04b2",
-        ),
-        _ => ("", ""),
+    let Some(model) = registry.models.iter().find(|m| m.id.ends_with(file_name)) else {
+        return Err(anyhow!("Model not listed in trusted registry"));
     };
 
-    if !Path::new(&path).exists() {
-        println!("⚠️ Model missing — redownloading...");
-        download_model(&path, url)?;
+    if !Path::new(&active_path).exists() {
+        println!("⚠️ Missing model — fetching from registry source");
+        download_model(&active_path, &model.uri)?;
     }
 
-    let computed = compute_sha256(&path)?;
-    if computed != trusted_hash {
-        println!("⚠️ Hash mismatch detected — repairing model...");
-        if Path::new(&path).exists() {
-            fs::remove_file(&path).ok();
+    let computed = compute_sha256(&active_path)?;
+    if computed != model.sha256 {
+        println!("⚠️ Hash mismatch — repairing from registry URL");
+        fs::remove_file(&active_path).ok();
+        download_model(&active_path, &model.uri)?;
+        let rehash = compute_sha256(&active_path)?;
+        if rehash != model.sha256 {
+            return Err(anyhow!("Checksum still invalid after redownload"));
         }
-        download_model(&path, url)?;
-        let new_hash = compute_sha256(&path)?;
-        if new_hash != trusted_hash {
-            return Err(anyhow!("Checksum mismatch after re-download."));
-        }
-        return Ok(format!("✅ Model repaired and verified (SHA256: {})", new_hash));
+        return Ok(format!(
+            "🛠️ Model repaired and verified ({} — {})",
+            model.id, rehash
+        ));
     }
 
-    Ok(format!("✅ Model verified successfully (SHA256: {})", computed))
+    Ok(format!("✅ Model verified successfully ({} — {})", model.id, computed))
 }
 
 /// --- Utility: Compute SHA256 hash ---
@@ -235,7 +245,7 @@ fn download_model(path: &str, url: &str) -> Result<()> {
         return Err(anyhow!("Unknown model URL"));
     }
     let tmp = format!("{}.part", path);
-    println!("⬇️ Downloading from HuggingFace...");
+    println!("⬇️ Downloading from registry source...");
     let status = Command::new("curl")
         .args(["-L", url, "-o", &tmp])
         .status()
