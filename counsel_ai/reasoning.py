@@ -62,27 +62,16 @@ def build_reasoning(case: CaseFile) -> ReasoningTree:
         # Return a basic reasoning tree in case of error
         return ReasoningTree(
             root_id="error",
-<<<<<<< HEAD
-            nodes=[ReasoningNode(
-                id="error",
-                claim="Errore nell'analisi del caso",
-                supports=["Errore tecnico"],
-                citations=[],
-                timestamp=datetime.now(timezone.utc),
-            )],
-            summary="Errore nell'analisi del caso. Consultare i log per dettagli."
-=======
             nodes=[
                 ReasoningNode(
                     id="error",
                     claim="Errore nell'analisi del caso",
                     supports=["Errore tecnico"],
                     citations=[],
-                    timestamp=datetime.utcnow(),
+                    timestamp=datetime.now(timezone.utc),
                 )
             ],
             summary="Errore nell'analisi del caso. Consultare i log per dettagli.",
->>>>>>> origin/main
         )
 
 
