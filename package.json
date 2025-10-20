@@ -13,6 +13,7 @@
     "mcp": "tsx src/index.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node --enable-source-maps dist/index.js",
+    "lint": "echo 'No linter configured for MCP server'",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {

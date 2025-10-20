@@ -1,4 +1,5 @@
 from __future__ import annotations
+<<<<<<< HEAD
 from typing import List, Optional, Literal
 from pydantic import BaseModel, Field, field_validator
 from datetime import datetime, timezone
@@ -14,6 +15,20 @@ class Party(BaseModel):
         if not v or not v.strip():
             raise ValueError("Party name cannot be empty")
         return v.strip()
+=======
+
+from datetime import datetime
+from typing import List, Literal, Optional
+
+from pydantic import BaseModel, Field
+
+
+class Party(BaseModel):
+    name: str
+    role: Literal[
+        "Ricorrente", "Resistente", "Attore", "Convenuto", "Cliente", "Controparte"
+    ]
+>>>>>>> origin/main
 
 
 class CaseFile(BaseModel):
