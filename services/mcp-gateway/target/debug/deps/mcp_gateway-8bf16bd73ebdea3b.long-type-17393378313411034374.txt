@@ -1,0 +1,1 @@
+std::boxed::Box<tower_governor::governor::GovernorConfig<tower_governor::key_extractor::PeerIpKeyExtractor, governor::middleware::NoOpMiddleware<governor::clock::quanta::QuantaInstant>>>
