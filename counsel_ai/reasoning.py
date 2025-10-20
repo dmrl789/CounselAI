@@ -1,16 +1,10 @@
 from __future__ import annotations
 
 import logging
-<<<<<<< HEAD
-from typing import List
 from datetime import datetime, timezone
-from .models import CaseFile, ReasoningNode, ReasoningTree, Opinion
-=======
-from datetime import datetime
 from typing import List
 
 from .models import CaseFile, Opinion, ReasoningNode, ReasoningTree
->>>>>>> origin/main
 
 logger = logging.getLogger(__name__)
 
