@@ -27,7 +27,7 @@ use tower_http::{
     sensitive_headers::SetSensitiveHeadersLayer,
 };
 use tower_governor::{governor::GovernorConfigBuilder, GovernorLayer};
-use std::time::Duration;
+// removed unused Duration import
 use dotenvy::dotenv;
 use std::net::SocketAddr;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
@@ -58,8 +58,8 @@ async fn main() -> anyhow::Result<()> {
     // Rate limiting configuration
     let governor_conf = Box::new(
         GovernorConfigBuilder::default()
-            .per_second(config.rate_limit_per_second)
-            .burst_size(config.rate_limit_burst_size)
+            .per_second(u64::from(config.rate_limit_per_second))
+            .burst_size(u32::from(config.rate_limit_burst_size))
             .finish()
             .unwrap(),
     );
@@ -80,9 +80,7 @@ async fn main() -> anyhow::Result<()> {
                 .layer(TraceLayer::new_for_http())
                 .layer(CompressionLayer::new())
                 .layer(SetSensitiveHeadersLayer::new(std::iter::once(AUTHORIZATION)))
-                .layer(GovernorLayer {
-                    config: governor_conf,
-                })
+                .layer(GovernorLayer { config: &governor_conf })
                 .layer(
                     CorsLayer::new()
                         .allow_origin(Any)
