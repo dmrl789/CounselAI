@@ -1,4 +1,4 @@
-use axum::{http::StatusCode, Json, extract::State};
+use axum::{http::StatusCode, Json};
 use serde_json::json;
 use validator::Validate;
 
@@ -26,7 +26,7 @@ pub async fn query(Json(mut req): Json<QueryRequest>) -> Result<Json<ReasoningRe
     }
 
     // Sanitize and validate
-    if let Err(e) = model::validation::validate_query_request(&mut req) {
+    if let Err(e) = crate::model::validation::validate_query_request(&mut req) {
         return Err((
             StatusCode::BAD_REQUEST,
             Json(json!({
@@ -58,7 +58,7 @@ pub async fn reason(Json(mut reason_req): Json<ReasoningRequest>) -> Result<(Sta
     }
 
     // Sanitize and validate
-    if let Err(e) = model::validation::validate_reasoning_request(&mut reason_req) {
+    if let Err(e) = crate::model::validation::validate_reasoning_request(&mut reason_req) {
         return Err((
             StatusCode::BAD_REQUEST,
             Json(json!({
@@ -94,7 +94,7 @@ pub async fn reason_local(Json(mut req): Json<ReasoningRequest>) -> Result<(Stat
     }
 
     // Sanitize and validate
-    if let Err(e) = model::validation::validate_reasoning_request(&mut req) {
+    if let Err(e) = crate::model::validation::validate_reasoning_request(&mut req) {
         return Err((
             StatusCode::BAD_REQUEST,
             Json(json!({
@@ -117,7 +117,7 @@ pub async fn reason_local(Json(mut req): Json<ReasoningRequest>) -> Result<(Stat
 }
 
 /// Basic verification of reasoning output
-pub async fn verify(Json(mut resp): Json<ReasoningResponse>) -> Result<Json<VerifyResponse>, (StatusCode, Json<serde_json::Value>)> {
+pub async fn verify(Json(resp): Json<ReasoningResponse>) -> Result<Json<VerifyResponse>, (StatusCode, Json<serde_json::Value>)> {
     // Validate input
     if let Err(validation_errors) = resp.validate() {
         return Err((

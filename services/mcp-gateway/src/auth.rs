@@ -8,7 +8,7 @@ use std::env;
 
 /// Simple API key authentication middleware
 pub async fn auth_middleware(
-    mut req: Request,
+    req: Request,
     next: Next,
 ) -> Result<Response, StatusCode> {
     // Skip auth for health endpoint

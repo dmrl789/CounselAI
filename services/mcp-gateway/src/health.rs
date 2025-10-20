@@ -1,5 +1,4 @@
 use axum::{http::StatusCode, Json};
-use serde_json::json;
 use std::time::{Duration, Instant};
 use tokio::time::timeout;
 use utoipa::ToSchema;
@@ -47,8 +46,7 @@ pub fn get_uptime() -> u64 {
 
 /// Comprehensive health check endpoint
 pub async fn health_check() -> (StatusCode, Json<HealthResponse>) {
-    let start_time = Instant::now();
-    let mut checks = HealthChecks {
+    let checks = HealthChecks {
         database: check_database().await,
         storage: check_storage().await,
         external_apis: check_external_apis().await,

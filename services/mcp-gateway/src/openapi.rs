@@ -1,23 +1,11 @@
 use utoipa::OpenApi;
 use utoipa_swagger_ui::SwaggerUi;
 
-use crate::{
-    model::*,
-    routes::*,
-    health::*,
-};
+use crate::model::*;
+use crate::health::{HealthResponse, HealthChecks, CheckResult};
 
 #[derive(OpenApi)]
 #[openapi(
-    paths(
-        routes::query,
-        routes::reason,
-        routes::reason_local,
-        routes::verify,
-        routes::store,
-        health::health_check,
-        health::metrics,
-    ),
     components(
         schemas(
             QueryRequest,
@@ -53,6 +41,7 @@ use crate::{
 pub struct ApiDoc;
 
 pub fn create_swagger_ui() -> SwaggerUi {
+    // Register the OpenAPI document with just the schemas to avoid derive path macros
     SwaggerUi::new("/docs")
         .url("/api-docs/openapi.json", ApiDoc::openapi())
 }
