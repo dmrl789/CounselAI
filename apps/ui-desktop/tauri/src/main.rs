@@ -1,11 +1,12 @@
 //! Counsel AI Desktop — Local Tauri Backend
 //! Provides safe, offline integration for the React UI.
-//! Exposes commands for MCP Gateway, local model management, and verification.
+//! Includes gateway control, full model verification, lightweight background checks,
+//! and local model management commands for install/activation.
 
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
 use once_cell::sync::Lazy;
-use serde::{Deserialize, Serialize};
+use sha2::{Digest, Sha256};
 use std::{
     fs,
     io::Read,
@@ -15,13 +16,12 @@ use std::{
 };
 use tauri::AppHandle;
 use anyhow::{anyhow, Result};
-use sha2::{Digest, Sha256};
+use serde::{Serialize, Deserialize};
 
 /// Track MCP gateway runtime state
 static MCP_STATUS: Lazy<Mutex<bool>> = Lazy::new(|| Mutex::new(false));
 
 /// --- Data Structures for Model Management ---
-
 #[derive(Serialize, Deserialize)]
 struct ModelInfo {
     name: String,
@@ -31,7 +31,6 @@ struct ModelInfo {
 }
 
 /// --- Gateway Controls ---
-
 #[tauri::command]
 async fn start_mcp_gateway(_app: AppHandle) -> Result<String, String> {
     let mut lock = MCP_STATUS.lock().map_err(|_| "Status lock poisoned".to_string())?;
@@ -61,6 +60,7 @@ async fn start_mcp_gateway(_app: AppHandle) -> Result<String, String> {
     }
 }
 
+/// --- Version Info ---
 #[tauri::command]
 fn app_version() -> String {
     env!("CARGO_PKG_VERSION").to_string()
@@ -127,7 +127,7 @@ fn set_active_model(model_path: String) -> Result<String, String> {
     Ok(format!("Active model set to {}", model_path))
 }
 
-/// --- Verify or Repair Active Local Model ---
+/// --- Full Verify or Repair Active Model ---
 #[tauri::command]
 fn verify_active_model() -> Result<String, String> {
     match verify_or_repair_model() {
@@ -136,6 +136,33 @@ fn verify_active_model() -> Result<String, String> {
     }
 }
 
+/// --- Lightweight background verification (hash-only, non-repairing) ---
+#[tauri::command]
+fn quick_verify_model() -> Result<String, String> {
+    let env_path = Path::new(".env");
+    let content = fs::read_to_string(env_path).unwrap_or_default();
+    let model_line = content
+        .lines()
+        .find(|l| l.starts_with("LOCAL_MODEL_PATH="))
+        .map(|l| l.replacen("LOCAL_MODEL_PATH=", "", 1).trim().to_string());
+
+    let Some(path) = model_line else {
+        return Err("LOCAL_MODEL_PATH not found in .env".into());
+    };
+
+    if !Path::new(&path).exists() {
+        return Err(format!("Model file not found: {}", path));
+    }
+
+    let mut file = std::fs::File::open(&path).map_err(|e| e.to_string())?;
+    let mut hasher = Sha256::new();
+    std::io::copy(&mut file, &mut hasher).map_err(|e| e.to_string())?;
+    let hash = format!("{:x}", hasher.finalize());
+
+    Ok(format!("✅ Model SHA256: {}", hash))
+}
+
+/// --- Helper: Full verify or repair ---
 fn verify_or_repair_model() -> Result<String> {
     let env_path = Path::new(".env");
     let content = fs::read_to_string(env_path).unwrap_or_default();
@@ -187,6 +214,7 @@ fn verify_or_repair_model() -> Result<String> {
     Ok(format!("✅ Model verified successfully (SHA256: {})", computed))
 }
 
+/// --- Utility: Compute SHA256 hash ---
 fn compute_sha256<P: AsRef<Path>>(path: P) -> Result<String> {
     let mut file = std::fs::File::open(&path)?;
     let mut hasher = Sha256::new();
@@ -201,6 +229,7 @@ fn compute_sha256<P: AsRef<Path>>(path: P) -> Result<String> {
     Ok(format!("{:x}", hasher.finalize()))
 }
 
+/// --- Utility: Download model if missing or corrupted ---
 fn download_model(path: &str, url: &str) -> Result<()> {
     if url.is_empty() {
         return Err(anyhow!("Unknown model URL"));
@@ -225,6 +254,7 @@ fn main() {
             start_mcp_gateway,
             app_version,
             verify_active_model,
+            quick_verify_model,
             list_local_models,
             install_model,
             set_active_model
