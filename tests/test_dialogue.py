@@ -1,5 +1,5 @@
 import pytest
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from counsel_ai.dialogue import interactive_intake, _ask_non_empty
 
 
@@ -36,13 +36,13 @@ class TestInteractiveIntake:
             "Fact 1",         # first fact
             "Fact 2",         # second fact
             "",               # empty fact (end)
-            "art. 1218 c.c.", # first law
+            "art. 1218 c.c.",  # first law
             "",               # empty law (end)
             "Tribunale di Milano"  # jurisdiction
         ]
-        
+
         result = interactive_intake()
-        
+
         assert result.case_id == "HT-2025-0001"
         assert result.client.name == "Test Client"
         assert result.client.role == "Cliente"
@@ -57,20 +57,20 @@ class TestInteractiveIntake:
             "Cliente",        # client_role
             "Fact 1",         # first fact
             "",               # empty fact (end)
-            "art. 1218 c.c.", # first law
+            "art. 1218 c.c.",  # first law
             "",               # empty law (end)
             "Tribunale di Milano"  # jurisdiction
         ]
-        
+
         result = interactive_intake("HT-2025-0001")
-        
+
         assert result.case_id == "HT-2025-0001"
         assert result.client.name == "Test Client"
 
     @patch('counsel_ai.dialogue.Prompt.ask')
     def test_interactive_intake_keyboard_interrupt(self, mock_prompt):
         mock_prompt.side_effect = KeyboardInterrupt()
-        
+
         with pytest.raises(KeyboardInterrupt):
             interactive_intake()
 
@@ -79,6 +79,6 @@ class TestInteractiveIntake:
         mock_prompt.side_effect = [
             "",  # empty case_id should cause validation error
         ]
-        
+
         with pytest.raises(ValueError, match="Maximum attempts exceeded"):
             interactive_intake()

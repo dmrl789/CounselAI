@@ -1,5 +1,4 @@
 import pytest
-from datetime import datetime
 from counsel_ai.models import Party, CaseFile, ReasoningNode, ReasoningTree, Opinion
 
 
@@ -12,7 +11,7 @@ class TestParty:
     def test_party_validation(self):
         with pytest.raises(ValueError):
             Party(name="", role="Cliente")
-        
+
         with pytest.raises(ValueError):
             Party(name="Test", role="InvalidRole")
 

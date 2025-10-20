@@ -1,11 +1,11 @@
-import pytest
 from counsel_ai.reasoning import build_reasoning, draft_opinion, _analyze_facts, _analyze_applicable_law
 from counsel_ai.models import CaseFile, Party
 
 
 class TestAnalyzeFacts:
     def test_analyze_facts_inadempimento(self):
-        facts = ["Il debitore non ha pagato la rata", "Mancato pagamento della somma dovuta"]
+        facts = ["Il debitore non ha pagato la rata",
+                 "Mancato pagamento della somma dovuta"]
         result = _analyze_facts(facts)
         assert "inadempimento" in result[0].lower()
 
@@ -51,9 +51,9 @@ class TestBuildReasoning:
             facts=["Il debitore non ha pagato"],
             applicable_law=["art. 1218 c.c."]
         )
-        
+
         result = build_reasoning(case)
-        
+
         assert result.root_id == "root"
         assert len(result.nodes) == 1
         assert "inadempimento" in result.summary.lower()
@@ -66,9 +66,9 @@ class TestBuildReasoning:
             facts=[],
             applicable_law=[]
         )
-        
+
         result = build_reasoning(case)
-        
+
         assert result.root_id == "root"
         assert "ulteriore istruttoria" in result.summary
 
@@ -81,9 +81,9 @@ class TestBuildReasoning:
             facts=["Test fact"],
             applicable_law=["art. 1218 c.c."]
         )
-        
+
         result = build_reasoning(case)
-        
+
         # Should return a valid reasoning tree even if there are issues
         assert result.root_id is not None
         assert result.summary is not None
@@ -98,10 +98,10 @@ class TestDraftOpinion:
             facts=["Il debitore non ha pagato"],
             applicable_law=["art. 1218 c.c."]
         )
-        
+
         reasoning = build_reasoning(case)
         opinion = draft_opinion(case, reasoning)
-        
+
         assert opinion.case_id == "HT-2025-0001"
         assert "HT-2025-0001" in opinion.title
         assert len(opinion.recommendations) > 0
@@ -115,10 +115,10 @@ class TestDraftOpinion:
             facts=[],
             applicable_law=[]
         )
-        
+
         reasoning = build_reasoning(case)
         opinion = draft_opinion(case, reasoning)
-        
+
         # Should return a valid opinion even with minimal data
         assert opinion.case_id == "HT-2025-0001"
         assert len(opinion.recommendations) > 0
