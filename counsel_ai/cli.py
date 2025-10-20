@@ -1,22 +1,25 @@
 from __future__ import annotations
+
 import json
 import logging
 import sys
 from pathlib import Path
 from typing import Optional
+
 import typer
 from rich.console import Console
 from rich.logging import RichHandler
-from .dialogue import interactive_intake
-from .reasoning import build_reasoning, draft_opinion
-from .docgen import generate_documents
+
 from .audit import append_record
+from .dialogue import interactive_intake
+from .docgen import generate_documents
+from .reasoning import build_reasoning, draft_opinion
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
-    handlers=[RichHandler(rich_tracebacks=True)]
+    handlers=[RichHandler(rich_tracebacks=True)],
 )
 logger = logging.getLogger(__name__)
 
@@ -25,7 +28,9 @@ console = Console()
 
 
 @app.command()
-def intake(case_id: Optional[str] = typer.Option(None, "--case-id", help="ID pratica")):
+def intake(
+    case_id: Optional[str] = typer.Option(None, "--case-id", help="ID pratica")
+) -> None:
     """Interactive case intake to build a CaseFile.json"""
     try:
         logger.info(f"Starting case intake for case_id: {case_id}")
@@ -41,44 +46,49 @@ def intake(case_id: Optional[str] = typer.Option(None, "--case-id", help="ID pra
 @app.command()
 def opinion(
     case_path: Path = typer.Argument(..., help="Path a CaseFile.json"),
-    output_json: Optional[Path] = typer.Option(None, "--out", help="File JSON di output"),
-):
+    output_json: Optional[Path] = typer.Option(
+        None, "--out", help="File JSON di output"
+    ),
+) -> None:
     """Generate legal opinion from case file"""
     try:
         logger.info(f"Generating opinion for case file: {case_path}")
-        
+
         if not case_path.exists():
             raise FileNotFoundError(f"Case file not found: {case_path}")
-        
+
         case_data = json.loads(case_path.read_text(encoding="utf-8"))
         from .models import CaseFile  # local import to avoid cli import weight
 
         case_obj = CaseFile.model_validate(case_data)
         logger.info(f"Validated case file for case_id: {case_obj.case_id}")
-        
+
         reasoning = build_reasoning(case_obj)
         logger.info("Built reasoning tree")
-        
+
         opin = draft_opinion(case_obj, reasoning)
         logger.info("Drafted opinion")
-        
-        append_record("opinion_generated", {
-            "case_id": case_obj.case_id,
-            "citations": opin.citations,
-            "summary": opin.summary,
-        })
+
+        append_record(
+            "opinion_generated",
+            {
+                "case_id": case_obj.case_id,
+                "citations": opin.citations,
+                "summary": opin.summary,
+            },
+        )
         logger.info("Recorded opinion generation in audit ledger")
 
         if output_json:
             output_json.write_text(
-                json.dumps(opin.model_dump(), ensure_ascii=False, indent=2), 
-                encoding="utf-8"
+                json.dumps(opin.model_dump(), ensure_ascii=False, indent=2),
+                encoding="utf-8",
             )
             logger.info(f"Opinion saved to: {output_json}")
-        
+
         console.print("[green]Parere generato.[/green]")
         console.print_json(data=opin.model_dump())
-        
+
     except FileNotFoundError as e:
         logger.error(f"File not found: {e}")
         console.print(f"[red]File not found: {e}[/red]")
@@ -97,16 +107,18 @@ def opinion(
 def export(
     case_path: Path = typer.Argument(..., help="Path a CaseFile.json"),
     opinion_path: Path = typer.Argument(..., help="Path a Opinion.json"),
-):
+) -> None:
     """Export case and opinion to DOCX and PDF documents"""
     try:
-        logger.info(f"Exporting documents for case: {case_path}, opinion: {opinion_path}")
-        
+        logger.info(
+            f"Exporting documents for case: {case_path}, opinion: {opinion_path}"
+        )
+
         if not case_path.exists():
             raise FileNotFoundError(f"Case file not found: {case_path}")
         if not opinion_path.exists():
             raise FileNotFoundError(f"Opinion file not found: {opinion_path}")
-        
+
         case_data = json.loads(case_path.read_text(encoding="utf-8"))
         opinion_data = json.loads(opinion_path.read_text(encoding="utf-8"))
         from .models import CaseFile, Opinion
@@ -117,12 +129,12 @@ def export(
 
         files = generate_documents(case_obj, opinion_obj)
         logger.info(f"Generated documents: {files}")
-        
+
         append_record("documents_exported", {"case_id": case_obj.case_id, **files})
         logger.info("Recorded document export in audit ledger")
-        
+
         console.print(f"[green]Esportati:[/green] {files}")
-        
+
     except FileNotFoundError as e:
         logger.error(f"File not found: {e}")
         console.print(f"[red]File not found: {e}[/red]")

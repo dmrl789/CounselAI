@@ -1,12 +1,23 @@
 from __future__ import annotations
-from typing import List, Optional, Literal
-from pydantic import BaseModel, Field
-from datetime import datetime
+
+from datetime import datetime, timezone
+from typing import List, Literal, Optional
+
+from pydantic import BaseModel, Field, field_validator
 
 
 class Party(BaseModel):
     name: str
-    role: Literal["Ricorrente", "Resistente", "Attore", "Convenuto", "Cliente", "Controparte"]
+    role: Literal[
+        "Ricorrente", "Resistente", "Attore", "Convenuto", "Cliente", "Controparte"
+    ]
+
+    @field_validator("name")
+    @classmethod
+    def name_must_not_be_empty(cls, v: str) -> str:
+        if not v or not v.strip():
+            raise ValueError("Name cannot be empty")
+        return v.strip()
 
 
 class CaseFile(BaseModel):
@@ -16,7 +27,14 @@ class CaseFile(BaseModel):
     facts: List[str] = Field(default_factory=list)
     jurisdiction: Optional[str] = None
     applicable_law: List[str] = Field(default_factory=list)
-    created_at: datetime = Field(default_factory=datetime.utcnow)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+    @field_validator("case_id")
+    @classmethod
+    def case_id_must_not_be_empty(cls, v: str) -> str:
+        if not v or not v.strip():
+            raise ValueError("Case ID cannot be empty")
+        return v.strip()
 
 
 class ReasoningNode(BaseModel):
@@ -24,7 +42,7 @@ class ReasoningNode(BaseModel):
     claim: str
     supports: List[str] = Field(default_factory=list)
     citations: List[str] = Field(default_factory=list)
-    timestamp: datetime = Field(default_factory=datetime.utcnow)
+    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 
 class ReasoningTree(BaseModel):
@@ -39,4 +57,4 @@ class Opinion(BaseModel):
     summary: str
     recommendations: List[str]
     citations: List[str]
-    generated_at: datetime = Field(default_factory=datetime.utcnow)
+    generated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
