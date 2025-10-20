@@ -1,0 +1,15 @@
+[package]
+name = "counselai-ui"
+version = "0.1.0"
+edition = "2021"
+authors = ["Désirée Verga <legal@ippan.org>"]
+
+[dependencies]
+tauri = { version = "2.0.0", features = ["dialog", "fs", "shell", "window"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
+once_cell = "1.19"
+
+[build-dependencies]
+tauri-build = { version = "2.0.0" }

@@ -1,0 +1,12 @@
+[package]
+name = "counsel-ai-tauri"
+version = "0.1.0"
+edition = "2021"
+publish = false
+
+[dependencies]
+anyhow = "1.0"
+pgp = "0.13"
+
+[dev-dependencies]
+tempfile = "3.10"
