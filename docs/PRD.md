@@ -76,3 +76,4 @@ flowchart TD
   TRUST -. Hashes + Keys .-> M3
   C1 -. Cloud Reasoning .-> M3
   C2 -. Local Inference .-> M3
+```
