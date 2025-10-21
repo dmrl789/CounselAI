@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from typing import Optional
+from typing import Optional, Literal, cast
 
 from pydantic import ValidationError
 from rich.console import Console
@@ -11,6 +11,16 @@ from .models import CaseFile, Party
 
 console = Console()
 logger = logging.getLogger(__name__)
+
+
+PartyRole = Literal[
+    "Ricorrente",
+    "Resistente",
+    "Attore",
+    "Convenuto",
+    "Cliente",
+    "Controparte",
+]
 
 
 def _ask_non_empty(prompt: str, max_attempts: int = 3) -> str:
@@ -36,6 +46,9 @@ def _ask_non_empty(prompt: str, max_attempts: int = 3) -> str:
             logger.error(f"Error in _ask_non_empty: {e}")
             raise
 
+    # Safety net for type-checkers: loop should never exit without return or raise
+    raise ValueError("Failed to obtain non-empty input")
+
 
 def interactive_intake(existing_case_id: Optional[str] = None) -> CaseFile:
     """Interactive case intake with comprehensive error handling"""
@@ -49,18 +62,21 @@ def interactive_intake(existing_case_id: Optional[str] = None) -> CaseFile:
         client_name = _ask_non_empty("Nome cliente")
         logger.info(f"Client name: {client_name}")
 
-        client_role = Prompt.ask(
+        client_role = cast(
+            PartyRole,
+            Prompt.ask(
             "Ruolo cliente",
-            choices=[
-                "Ricorrente",
-                "Resistente",
-                "Attore",
-                "Convenuto",
-                "Cliente",
-                "Controparte",
-            ],
-            default="Cliente",
-            show_choices=False,
+                choices=[
+                    "Ricorrente",
+                    "Resistente",
+                    "Attore",
+                    "Convenuto",
+                    "Cliente",
+                    "Controparte",
+                ],
+                default="Cliente",
+                show_choices=False,
+            ),
         )
         logger.info(f"Client role: {client_role}")
 
