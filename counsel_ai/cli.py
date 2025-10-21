@@ -28,7 +28,7 @@ console = Console()
 
 
 @app.command()
-def intake(case_id: Optional[str] = typer.Option(None, "--case-id", help="ID pratica")):
+def intake(case_id: Optional[str] = typer.Option(None, "--case-id", help="ID pratica")) -> None:
     """Interactive case intake to build a CaseFile.json"""
     try:
         logger.info(f"Starting case intake for case_id: {case_id}")
@@ -47,7 +47,7 @@ def opinion(
     output_json: Optional[Path] = typer.Option(
         None, "--out", help="File JSON di output"
     ),
-):
+) -> None:
     """Generate legal opinion from case file"""
     try:
         logger.info(f"Generating opinion for case file: {case_path}")
@@ -105,7 +105,7 @@ def opinion(
 def export(
     case_path: Path = typer.Argument(..., help="Path a CaseFile.json"),
     opinion_path: Path = typer.Argument(..., help="Path a Opinion.json"),
-):
+) -> None:
     """Export case and opinion to DOCX and PDF documents"""
     try:
         logger.info(

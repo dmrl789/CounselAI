@@ -79,7 +79,9 @@ class TestInteractiveIntake:
     @patch("counsel_ai.dialogue.Prompt.ask")
     def test_interactive_intake_validation_error(self, mock_prompt):
         mock_prompt.side_effect = [
-            "",  # empty case_id should cause validation error
+            "",  # empty case_id - attempt 1
+            "",  # empty case_id - attempt 2
+            "",  # empty case_id - attempt 3 (should raise ValueError)
         ]
 
         with pytest.raises(ValueError, match="Maximum attempts exceeded"):

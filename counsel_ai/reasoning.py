@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List
 
 from .models import CaseFile, Opinion, ReasoningNode, ReasoningTree
@@ -34,7 +34,7 @@ def build_reasoning(case: CaseFile) -> ReasoningTree:
                 "Applicazione delle norme e dei precedenti indicati",
             ],
             citations=[c for c in case.applicable_law if c in CANONICAL_CITATIONS],
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(timezone.utc),
         )
 
         nodes: List[ReasoningNode] = [root]
@@ -68,7 +68,7 @@ def build_reasoning(case: CaseFile) -> ReasoningTree:
                     claim="Errore nell'analisi del caso",
                     supports=["Errore tecnico"],
                     citations=[],
-                    timestamp=datetime.utcnow(),
+                    timestamp=datetime.now(timezone.utc),
                 )
             ],
             summary="Errore nell'analisi del caso. Consultare i log per dettagli.",
