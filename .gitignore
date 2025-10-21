@@ -17,3 +17,11 @@ services/mcp-gateway/models/*.gguf
 # Trusted registry signature & checksum files
 services/mcp-gateway/models/trusted_models.json.asc
 services/mcp-gateway/models/trusted_models.json.sha256
+
+# Python cache files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
